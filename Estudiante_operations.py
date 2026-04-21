@@ -1,6 +1,7 @@
 import os
 import csv
 from models import EstudianteBase, EstudianteId
+from typing import Optional
 
 CSV_FILE = "estudiante.csv"
 columns = ["id", "nombre", "programa", "codigo"]
@@ -39,3 +40,19 @@ def showEstudiante(id:int):
         for row in reader:
             if int(row["id"]) == id:
                 return EstudianteId(**row)
+
+def deleteEstudiante(id:int):
+    estudiante_deleted: Optional[EstudianteBase]=None
+    estudiantes = showEstudiantes()
+    with open(CSV_FILE, mode="w", newline='') as file:
+        writer = csv.DictWriter(file,fieldnames=columns)
+        writer.writeheader()
+        for estudiante_ in estudiantes:
+            if estudiante_.id == id:
+                estudiante_deleted = estudiante_
+                continue
+            writer.writerow(estudiante_.model_dump())
+    if estudiante_deleted:
+        dict_estudiante_no_id = estudiante_deleted.model_dump()
+        del dict_estudiante_no_id["id"]
+        return EstudianteBase(**dict_estudiante_no_id)
