@@ -27,3 +27,8 @@ def createEstudiante(pokemon:EstudianteBase):
     new_pokemon = EstudianteId(id=id,**pokemon.model_dump())
     saveEstudianteID(new_pokemon)
     return new_pokemon
+
+def showEstudiantes():
+    with open(CSV_FILE) as file:
+        reader = csv.DictReader(file)
+        return [EstudianteId(**row) for row in reader]
