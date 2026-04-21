@@ -32,3 +32,10 @@ def showEstudiantes():
     with open(CSV_FILE) as file:
         reader = csv.DictReader(file)
         return [EstudianteId(**row) for row in reader]
+
+def showEstudiante(id:int):
+    with open(CSV_FILE) as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if int(row["id"]) == id:
+                return EstudianteId(**row)
