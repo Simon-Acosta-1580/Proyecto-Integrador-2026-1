@@ -30,9 +30,12 @@ def createEstudiante(pokemon:EstudianteBase):
     return new_pokemon
 
 def showEstudiantes():
-    with open(CSV_FILE) as file:
-        reader = csv.DictReader(file)
-        return [EstudianteId(**row) for row in reader]
+    try:
+        with open(CSV_FILE, mode="r", newline='') as file:
+            reader = csv.DictReader(file)
+            return [EstudianteId(**row) for row in reader]
+    except FileNotFoundError:
+        return []
 
 def showEstudiante(id:int):
     with open(CSV_FILE) as file:
@@ -56,3 +59,29 @@ def deleteEstudiante(id:int):
         dict_estudiante_no_id = estudiante_deleted.model_dump()
         del dict_estudiante_no_id["id"]
         return EstudianteBase(**dict_estudiante_no_id)
+
+
+def updateEstudiante(id: int, estudiante_actualizado: EstudianteBase) -> Optional[EstudianteId]:
+    estudiantes = showEstudiantes()
+    encontrado = False
+    lista_actualizada = []
+    resultado = None
+
+    for est in estudiantes:
+        if est.id == id:
+            nuevo_estudiante = EstudianteId(id=id, **estudiante_actualizado.model_dump())
+            lista_actualizada.append(nuevo_estudiante)
+            resultado = nuevo_estudiante
+            encontrado = True
+        else:
+            lista_actualizada.append(est)
+
+    if encontrado:
+        with open(CSV_FILE, mode="w", newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=columns)
+            writer.writeheader()
+            for e in lista_actualizada:
+                writer.writerow(e.model_dump())
+        return resultado
+
+    return None
