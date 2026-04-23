@@ -15,19 +15,19 @@ def newID():
     except (FileNotFoundError, csv.Error):
         return 1
 
-def saveEstudianteID(pokemon:EstudianteId):
+def saveEstudianteID(estudiante:EstudianteId):
     estudiante_exists = os.path.exists(CSV_FILE)
     with open(CSV_FILE, mode="a+",newline='') as file:
         writer = csv.DictWriter(file,fieldnames=columns)
         if not estudiante_exists:
             writer.writeheader()
-        writer.writerow(pokemon.model_dump())
+        writer.writerow(estudiante.model_dump())
 
-def createEstudiante(pokemon:EstudianteBase):
+def createEstudiante(estudiante:EstudianteBase):
     id = newID()
-    new_pokemon = EstudianteId(id=id,**pokemon.model_dump())
-    saveEstudianteID(new_pokemon)
-    return new_pokemon
+    new_estudiante = EstudianteId(id=id,**estudiante.model_dump())
+    saveEstudianteID(new_estudiante)
+    return new_estudiante
 
 def showEstudiantes():
     try:
