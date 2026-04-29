@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from Estudiante_operations import createEstudiante, showEstudiantes, showEstudiante, deleteEstudiante, updateEstudiante
 from Implemento_operations import createImplemento, showImplementos, showImplemento, deleteImplemento, updateImplemento
-from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId
+from turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
+from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId, TurnoBase, TurnoId
 
 app = FastAPI()
 
@@ -83,5 +84,65 @@ async def edit_implemento(id: int, datos_nuevos: ImplementoBase):
     if not implemento_editado:
         raise HTTPException(status_code=404, detail=f"Implemento con ID {id} no encontrado")
     return implemento_editado
+
+@app.post("/turno", response_model=TurnoId) # Cambiado a TurnoId
+async def create_turno(turno: TurnoBase):
+    return createTurno(turno)
+
+@app.get("/turnos/", response_model=list[TurnoId])
+async def show_all_turnos():
+    lista_turnos = showTurnos()
+    if not lista_turnos:
+        return []
+    return lista_turnos
+
+@app.get("/turnosInactivos/", response_model=list[TurnoId])
+async def show_all_turnos_inactivos():
+    lista_turnos = showTurnosInactivos()
+    if not lista_turnos:
+        return []
+    return lista_turnos
+
+@app.get("/turno/{id}", response_model=TurnoId)
+async def show_one_turno(id:int):
+    turno = showTurno(id)
+    if not(turno):
+        raise HTTPException(status_code=404, detail=f"{id} turno not found")
+    return turno
+
+
+@app.get("/turnos/buscar/", response_model=list[TurnoId])
+async def buscar_por_horario(horario: str):
+    resultados = getTurnosByHorario(horario)
+
+    if resultados is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Horario no válido. Debe ser 'diurno' o 'nocturno'."
+        )
+
+    if not resultados:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontraron turnos activos en el horario: {horario}"
+        )
+
+    return resultados
+
+@app.delete("/turno/{id}", response_model=TurnoBase)
+async def delete_one_turno(id: int):
+    deleted = deleteTurno(id)
+
+    if deleted is None:
+        raise HTTPException(status_code=404, detail=f"Turno con ID {id} no encontrado")
+
+    return deleted
+
+@app.patch("/turno/{id}", response_model=TurnoId)
+async def update_turno(id: int, datos_nuevos: TurnoBase):
+    turno_editado = updateTurno(id, datos_nuevos)
+    if not turno_editado:
+        raise HTTPException(status_code=404, detail=f"Turno con ID {id} no encontrado")
+    return turno_editado
 
 
