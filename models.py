@@ -15,6 +15,7 @@ class EstudianteId(EstudianteBase):
 
 class ImplementoBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=50)
+    codigo: int = Field(..., gt=0)
     categoria: Categoria = Field(..., min_length=1, max_length=50)
     activo: bool = True
 

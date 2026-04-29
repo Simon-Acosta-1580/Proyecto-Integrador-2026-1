@@ -1,41 +1,60 @@
 import os
 import csv
+from fastapi import HTTPException
 from models import ImplementoBase, ImplementoId
 from typing import Optional
 
 CSV_FILE = "implemento.csv"
-columns = ["id", "nombre", "categoria"]
+columns = ["id", "nombre", "codigo", "categoria", "activo"]
 
 def newID():
+    if not os.path.exists(CSV_FILE):
+        return 1
     try:
-        with open(CSV_FILE, mode="r",newline='') as file:
+        with open(CSV_FILE, mode="r", newline='') as file:
             reader = csv.DictReader(file)
-            max_id = max(int(row["id"]) for row in reader)
-            return max_id+1
-    except (FileNotFoundError, csv.Error):
+            ids = [int(row["id"]) for row in reader]
+            return max(ids) + 1 if ids else 1
+    except (FileNotFoundError, csv.Error, ValueError):
         return 1
 
-def saveImplementoID(implemento:ImplementoBase):
-    implemento_exists = os.path.exists(CSV_FILE)
-    with open(CSV_FILE, mode="a+",newline='') as file:
-        writer = csv.DictWriter(file,fieldnames=columns)
-        if not implemento_exists:
+def saveImplementoID(implemento: ImplementoId):
+    file_exists = os.path.exists(CSV_FILE)
+    with open(CSV_FILE, mode="a", newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=columns)
+        if not file_exists:
             writer.writeheader()
         writer.writerow(implemento.model_dump())
 
-def createImplemento(implemento:ImplementoBase):
+def createImplemento(implemento: ImplementoId):
+    existing_implementos = getAllImplementos()
+
+    for i in existing_implementos:
+        if i.activo == True and i.codigo == implemento.codigo:
+            raise HTTPException(status_code=400, detail=f"El implemento con código {implemento.codigo} ya existe.")
+
     id = newID()
-    new_implemento = ImplementoId(id=id,**implemento.model_dump())
+    new_implemento = ImplementoId(id=id, **implemento.model_dump(exclude={'id'}))
     saveImplementoID(new_implemento)
     return new_implemento
 
-def showImplementos():
+def getAllImplementos():
+    if not os.path.exists(CSV_FILE):
+        return []
     try:
         with open(CSV_FILE, mode="r", newline='') as file:
             reader = csv.DictReader(file)
             return [ImplementoId(**row) for row in reader]
-    except FileNotFoundError:
+    except (FileNotFoundError, csv.Error):
         return []
+
+def showImplementos():
+    all_implementos = getAllImplementos()
+    return [implemento for implemento in all_implementos if implemento.activo is True or str(implemento.activo).lower() == 'true']
+
+def showImplementosInactivos():
+    all_implementos = getAllImplementos()
+    return [implemento for implemento in all_implementos if implemento.activo is False or str(implemento.activo).lower() == 'false']
 
 def showImplemento(id:int):
     with open(CSV_FILE) as file:
@@ -44,36 +63,56 @@ def showImplemento(id:int):
             if int(row["id"]) == id:
                 return ImplementoId(**row)
 
-def deleteImplemento(id:int):
-    implemento_deleted: Optional[ImplementoBase]=None
-    implementos = showImplementos()
+def getImplementoByCategoria(tipo_categoria: str):
+    tipo_categoria = tipo_categoria.lower()
+
+    if tipo_categoria not in ["balon", "instrumento", "juego", "cancha"]:
+        return None
+
+    all_implementos = getAllImplementos()
+    busqueda = [i for i in all_implementos if i.categoria.lower() == tipo_categoria and i.activo]
+
+    return busqueda
+
+def deleteImplemento(id: int):
+    implemento_deleted: Optional[ImplementoId] = None
+    implementos = getAllImplementos()
+
     with open(CSV_FILE, mode="w", newline='') as file:
-        writer = csv.DictWriter(file,fieldnames=columns)
+        writer = csv.DictWriter(file, fieldnames=columns)
         writer.writeheader()
-        for implemento_ in implementos:
-            if implemento_.id == id:
-                implemento_deleted = implemento_
-                continue
-            writer.writerow(implemento_.model_dump())
-    if implemento_deleted:
-        dict_implemento_no_id = implemento_deleted.model_dump()
-        del dict_implemento_no_id["id"]
-        return ImplementoBase(**dict_implemento_no_id)
+
+        for implemento in implementos:
+            if int(implemento.id) == id:
+                implemento.activo = False
+                implemento_deleted = implemento
+
+            writer.writerow(implemento.model_dump())
+
+    return implemento_deleted
 
 def updateImplemento(id: int, implemento_actualizado: ImplementoBase) -> Optional[ImplementoId]:
-    implementos = showImplementos()
+    implementos = getAllImplementos()
     encontrado = False
     lista_actualizada = []
     resultado = None
 
-    for est in implementos:
-        if est.id == id:
-            nuevo_implemento = ImplementoId(id=id, **implemento_actualizado.model_dump())
+    for implemento_existente in implementos:
+        if int(implemento_existente.id) == id:
+            datos_nuevos = implemento_actualizado.model_dump(exclude={'id', 'codigo', 'activo'})
+
+            nuevo_implemento = ImplementoId(
+                id=id,
+                codigo=implemento_existente.codigo,
+                activo=implemento_existente.activo,
+                **datos_nuevos
+            )
+
             lista_actualizada.append(nuevo_implemento)
             resultado = nuevo_implemento
             encontrado = True
         else:
-            lista_actualizada.append(est)
+            lista_actualizada.append(implemento_existente)
 
     if encontrado:
         with open(CSV_FILE, mode="w", newline='') as file:
