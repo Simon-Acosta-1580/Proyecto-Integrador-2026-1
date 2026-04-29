@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from Estudiante_operations import createEstudiante, showEstudiantes, showEstudiante, deleteEstudiante, updateEstudiante
+from Estudiante_operations import createEstudiante, showEstudiantes, showEstudiantesInactivos, showEstudiante, getEstudianteByPrograma, deleteEstudiante, updateEstudiante
 from Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
 from turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
 from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId, TurnoBase, TurnoId
@@ -10,10 +10,9 @@ app = FastAPI()
 def hola():
     return {"message": "Hello World"}
 
-@app.post("/estudiante", response_model=EstudianteId)
+@app.post("/estudiante", response_model=EstudianteBase)
 async def create_estudiante(estudiante:EstudianteBase):
     return createEstudiante(estudiante)
-
 
 @app.get("/estudiantes/", response_model=list[EstudianteId])
 async def show_all_estudiantes():
@@ -27,6 +26,16 @@ async def show_all_estudiantes():
 
     return lista_estudiantes
 
+@app.get("/estudiantesInactivos/", response_model=list[EstudianteId])
+async def show_all_estudiantes_inactivos():
+    lista_estudiantes = showEstudiantesInactivos()
+    if not lista_estudiantes:
+        raise HTTPException(
+            status_code=404,
+            detail="No se encontraron estudiantes inactivos registrados."
+        )
+    return lista_estudiantes
+
 @app.get("/estudiante/{id}", response_model=EstudianteId)
 async def show_one_estudiante(id:int):
     estudiante = showEstudiante(id)
@@ -34,15 +43,35 @@ async def show_one_estudiante(id:int):
         raise HTTPException(status_code=404, detail=f"{id} estudiante not found")
     return estudiante
 
+@app.get("/estudiante/buscar/", response_model=list[EstudianteId])
+async def buscar_por_programa(programa: str):
+    resultados = getEstudianteByPrograma(programa)
+
+    if resultados is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Categoria no valida, unicamente 'ingenieria', 'derecho', 'arquitectura', 'psicologia'."
+        )
+
+    if not resultados:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontraron estudiantes activos en el programa: {programa}"
+        )
+
+    return resultados
+
 @app.delete("/estudiante/{id}", response_model=EstudianteBase)
-async def delete_one_estudiante(id:int):
+async def delete_one_estudiante(id: int):
     deleted = deleteEstudiante(id)
-    if not(deleted):
-        raise HTTPException(status_code=404, detail=f"{id} Estudiante not found")
+
+    if deleted is None:
+        raise HTTPException(status_code=404, detail=f"Estudiante con ID {id} no encontrado")
+
     return deleted
 
 @app.patch("/estudiante/{id}", response_model=EstudianteId)
-async def edit_estudiante(id: int, datos_nuevos: EstudianteBase):
+async def update_estudiante(id: int, datos_nuevos: EstudianteBase):
     estudiante_editado = updateEstudiante(id, datos_nuevos)
     if not estudiante_editado:
         raise HTTPException(status_code=404, detail=f"Estudiante con ID {id} no encontrado")
