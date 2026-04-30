@@ -6,15 +6,15 @@ from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId, T
 
 app = FastAPI()
 
-@app.get("/hola")
+@app.get("/hola", tags=["saludo"])
 def hola():
     return {"message": "Hello World"}
 
-@app.post("/estudiante", response_model=EstudianteBase)
+@app.post("/estudiante", response_model=EstudianteBase, tags=["Estudiantes"])
 async def create_estudiante(estudiante:EstudianteBase):
     return createEstudiante(estudiante)
 
-@app.get("/estudiantes/", response_model=list[EstudianteId])
+@app.get("/estudiantes/", response_model=list[EstudianteId], tags=["Estudiantes"])
 async def show_all_estudiantes():
     lista_estudiantes = showEstudiantes()
 
@@ -26,7 +26,7 @@ async def show_all_estudiantes():
 
     return lista_estudiantes
 
-@app.get("/estudiantesInactivos/", response_model=list[EstudianteId])
+@app.get("/estudiantesInactivos/", response_model=list[EstudianteId], tags=["Estudiantes"])
 async def show_all_estudiantes_inactivos():
     lista_estudiantes = showEstudiantesInactivos()
     if not lista_estudiantes:
@@ -36,14 +36,14 @@ async def show_all_estudiantes_inactivos():
         )
     return lista_estudiantes
 
-@app.get("/estudiante/{id}", response_model=EstudianteId)
+@app.get("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
 async def show_one_estudiante(id:int):
     estudiante = showEstudiante(id)
     if not(estudiante):
         raise HTTPException(status_code=404, detail=f"{id} estudiante not found")
     return estudiante
 
-@app.get("/estudiante/buscar/", response_model=list[EstudianteId])
+@app.get("/estudiante/buscar/", response_model=list[EstudianteId], tags=["Estudiantes"])
 async def buscar_por_programa(programa: str):
     resultados = getEstudianteByPrograma(programa)
 
@@ -61,7 +61,7 @@ async def buscar_por_programa(programa: str):
 
     return resultados
 
-@app.delete("/estudiante/{id}", response_model=EstudianteBase)
+@app.delete("/estudiante/{id}", response_model=EstudianteBase, tags=["Estudiantes"])
 async def delete_one_estudiante(id: int):
     deleted = deleteEstudiante(id)
 
@@ -70,18 +70,18 @@ async def delete_one_estudiante(id: int):
 
     return deleted
 
-@app.patch("/estudiante/{id}", response_model=EstudianteId)
+@app.patch("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
 async def update_estudiante(id: int, datos_nuevos: EstudianteBase):
     estudiante_editado = updateEstudiante(id, datos_nuevos)
     if not estudiante_editado:
         raise HTTPException(status_code=404, detail=f"Estudiante con ID {id} no encontrado")
     return estudiante_editado
 
-@app.post("/implemento", response_model=ImplementoBase)
+@app.post("/implemento", response_model=ImplementoBase, tags=["Implementos"])
 async def create_implemento(implemento:ImplementoBase):
     return createImplemento(implemento)
 
-@app.get("/implementos/", response_model=list[ImplementoId])
+@app.get("/implementos/", response_model=list[ImplementoId], tags=["Implementos"])
 async def show_all_implementos():
     lista_implementos = showImplementos()
 
@@ -93,7 +93,7 @@ async def show_all_implementos():
 
     return lista_implementos
 
-@app.get("/implementosInactivos/", response_model=list[ImplementoId])
+@app.get("/implementosInactivos/", response_model=list[ImplementoId], tags=["Implementos"])
 async def show_all_implementos_inactivos():
     lista_implementos = showImplementosInactivos()
     if not lista_implementos:
@@ -103,14 +103,14 @@ async def show_all_implementos_inactivos():
         )
     return lista_implementos
 
-@app.get("/implemento/{id}", response_model=ImplementoId)
+@app.get("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
 async def show_one_implemento(id:int):
     implemento = showImplemento(id)
     if not(implemento):
         raise HTTPException(status_code=404, detail=f"{id} implemento not found")
     return implemento
 
-@app.get("/implemento/buscar/", response_model=list[ImplementoId])
+@app.get("/implemento/buscar/", response_model=list[ImplementoId], tags=["Implementos"])
 async def buscar_por_categoria(categoria: str):
     resultados = getImplementoByCategoria(categoria)
 
@@ -128,7 +128,7 @@ async def buscar_por_categoria(categoria: str):
 
     return resultados
 
-@app.delete("/implemento/{id}", response_model=ImplementoBase)
+@app.delete("/implemento/{id}", response_model=ImplementoBase, tags=["Implementos"])
 async def delete_one_implemento(id: int):
     deleted = deleteImplemento(id)
 
@@ -137,18 +137,18 @@ async def delete_one_implemento(id: int):
 
     return deleted
 
-@app.patch("/implemento/{id}", response_model=ImplementoId)
+@app.patch("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
 async def update_implemento(id: int, datos_nuevos: ImplementoBase):
     implemento_editado = updateImplemento(id, datos_nuevos)
     if not implemento_editado:
         raise HTTPException(status_code=404, detail=f"Implemento con ID {id} no encontrado")
     return implemento_editado
 
-@app.post("/turno", response_model=TurnoId)
+@app.post("/turno", response_model=TurnoId, tags=["Turnos"])
 async def create_turno(turno: TurnoBase):
     return createTurno(turno)
 
-@app.get("/turnos/", response_model=list[TurnoId])
+@app.get("/turnos/", response_model=list[TurnoId], tags=["Turnos"])
 async def show_all_turnos():
     lista_turnos = showTurnos()
 
@@ -160,7 +160,7 @@ async def show_all_turnos():
 
     return lista_turnos
 
-@app.get("/turnosInactivos/", response_model=list[TurnoId])
+@app.get("/turnosInactivos/", response_model=list[TurnoId], tags=["Turnos"])
 async def show_all_turnos_inactivos():
     lista_turnos = showTurnosInactivos()
     if not lista_turnos:
@@ -170,7 +170,7 @@ async def show_all_turnos_inactivos():
         )
     return lista_turnos
 
-@app.get("/turno/{id}", response_model=TurnoId)
+@app.get("/turno/{id}", response_model=TurnoId, tags=["Turnos"])
 async def show_one_turno(id:int):
     turno = showTurno(id)
     if not(turno):
@@ -178,7 +178,7 @@ async def show_one_turno(id:int):
     return turno
 
 
-@app.get("/turnos/buscar/", response_model=list[TurnoId])
+@app.get("/turnos/buscar/", response_model=list[TurnoId], tags=["Turnos"])
 async def buscar_por_horario(horario: str):
     resultados = getTurnosByHorario(horario)
 
@@ -196,7 +196,7 @@ async def buscar_por_horario(horario: str):
 
     return resultados
 
-@app.delete("/turno/{id}", response_model=TurnoBase)
+@app.delete("/turno/{id}", response_model=TurnoBase, tags=["Turnos"])
 async def delete_one_turno(id: int):
     deleted = deleteTurno(id)
 
@@ -205,7 +205,7 @@ async def delete_one_turno(id: int):
 
     return deleted
 
-@app.patch("/turno/{id}", response_model=TurnoId)
+@app.patch("/turno/{id}", response_model=TurnoId, tags=["Turnos"])
 async def update_turno(id: int, datos_nuevos: TurnoBase):
     turno_editado = updateTurno(id, datos_nuevos)
     if not turno_editado:
