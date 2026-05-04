@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field, model_validator
-from ProgramaEstudio import Carrera
-from categoriaImplemento import Categoria
-from horarioTurno import Horario
-from typing import Optional
+from atributos.ProgramaEstudio import Carrera
+from atributos.categoriaImplemento import Categoria
+from atributos.horarioTurno import Horario
+
 
 class EstudianteBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=50)

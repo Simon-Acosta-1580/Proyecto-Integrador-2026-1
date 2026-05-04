@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from Estudiante_operations import createEstudiante, showEstudiantes, showEstudiantesInactivos, showEstudiante, getEstudianteByPrograma, deleteEstudiante, updateEstudiante
-from Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
-from turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
+from operations.Estudiante_operations import createEstudiante, showEstudiantes, showEstudiantesInactivos, showEstudiante, getEstudianteByPrograma, deleteEstudiante, updateEstudiante
+from operations.Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
+from operations.turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
 from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId, TurnoBase, TurnoId
 
 app = FastAPI()
