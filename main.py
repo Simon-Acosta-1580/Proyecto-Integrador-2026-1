@@ -3,6 +3,8 @@ from operations.Estudiante_operations import createEstudiante, showEstudiantes, 
 from operations.Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
 from operations.turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
 from models import EstudianteBase, EstudianteId, ImplementoBase, ImplementoId, TurnoBase, TurnoId
+from sqlmodel import Session
+from db import SessionDep, create_all_tables
 
 app = FastAPI()
 
