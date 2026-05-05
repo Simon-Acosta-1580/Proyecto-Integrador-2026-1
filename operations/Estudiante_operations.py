@@ -16,3 +16,9 @@ def createEstudiante(estudiante: EstudianteBase, session: Session):
 
 def show_all_estudiantes(session: Session):
     return session.exec(select(EstudianteId))
+
+def find_one_estudiante(id: int, session: Session):
+    try:
+        return session.get(EstudianteId, id)
+    except NoResultFound:
+        return None

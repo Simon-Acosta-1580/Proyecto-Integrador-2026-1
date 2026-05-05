@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from operations.Estudiante_operations import createEstudiante, show_all_estudiantes
+from operations.Estudiante_operations import createEstudiante, show_all_estudiantes, find_one_estudiante
 from operations.Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
 from operations.turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId, TurnoBase, TurnoId
@@ -24,5 +24,12 @@ async def read_estudiantes(session: SessionDep):
     if not lista_estudiantes:
         raise HTTPException(status_code=404, detail=f"No se encontraron estudiantes registrados")
     return lista_estudiantes
+
+@app.get("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
+async def show_one_estudiante(id: int, session: SessionDep):
+    estudiante = find_one_estudiante(id, session)
+    if not estudiante:
+        raise HTTPException(status_code=404,detail=f"No se encontro estudiante con id: {id}")
+    return estudiante
 
 
