@@ -1,19 +1,27 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import model_validator
 from atributos.ProgramaEstudio import Carrera
 from atributos.categoriaImplemento import Categoria
 from atributos.horarioTurno import Horario
+from email.policy import default
+from typing import Optional
+from sqlmodel import SQLModel, Field
 
-
-class EstudianteBase(BaseModel):
-    nombre: str = Field(..., min_length=1, max_length=50)
-    programa: Carrera = Field(..., min_length=1, max_length=50)
-    codigo: int = Field(..., gt=0)
+class EstudianteBase(SQLModel):
+    nombre: str = Field(default=None, min_length=1, max_length=50)
+    programa: Carrera = Field(default=None, min_length=1, max_length=50)
+    codigo: int = Field(default=None, gt=0)
     activo: bool = True
 
-class EstudianteId(EstudianteBase):
-    id: int = Field(..., gt=0)
+class EstudianteId(EstudianteBase, table=True):
+    id: int = Field(default=None, primary_key=True, gt=0)
 
-class ImplementoBase(BaseModel):
+class EstudianteUpdate(EstudianteBase):
+    nombre: str = Field(default=None, min_length=1, max_length=50)
+    programa: Carrera = Field(default=None, min_length=1, max_length=50)
+    codigo: int = Field(None, exclude=True)
+    activo: bool = Field(None, exclude=True)
+
+class ImplementoBase(SQLModel):
     nombre: str = Field(..., min_length=1, max_length=50)
     codigo: int = Field(..., gt=0)
     categoria: Categoria = Field(..., min_length=1, max_length=50)
@@ -22,7 +30,7 @@ class ImplementoBase(BaseModel):
 class ImplementoId(ImplementoBase):
     id: int = Field(..., gt=0)
 
-class TurnoBase(BaseModel):
+class TurnoBase(SQLModel):
     codigo: int = Field(..., gt=0)
     hora_inicio: int = Field(..., gt=8, le=19)
     horario: Horario = Field(..., min_length=1, max_length=50)
