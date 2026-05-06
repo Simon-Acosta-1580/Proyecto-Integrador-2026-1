@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from operations.Estudiante_operations import createEstudiante, show_all_estudiantes, find_one_estudiante
+from operations.Estudiante_operations import createEstudiante, show_all_estudiantes, find_one_estudiante, find_one_estudiante_programa
 from operations.Implemento_operations import createImplemento, showImplementos, showImplementosInactivos, showImplemento, getImplementoByCategoria, deleteImplemento, updateImplemento
 from operations.turno_Operations import createTurno, showTurnos, showTurno, showTurnosInactivos, getTurnosByHorario, deleteTurno, updateTurno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId, TurnoBase, TurnoId
@@ -31,5 +31,9 @@ async def show_one_estudiante(id: int, session: SessionDep):
     if not estudiante:
         raise HTTPException(status_code=404,detail=f"No se encontro estudiante con id: {id}")
     return estudiante
-
+@app.get("/estudiante/buscar", response_model=EstudianteId, tags=["Estudiantes"])
+async def show_estudiantes_programa(programa: str, session: SessionDep):
+    estudiante = find_one_estudiante(programa, session)
+    if not estudiante:
+        raise HTTPException(status_code=404, detail=f"No se encontro estudiante del programa: {programa}")
 

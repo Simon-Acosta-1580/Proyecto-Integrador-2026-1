@@ -22,3 +22,9 @@ def find_one_estudiante(id: int, session: Session):
         return session.get(EstudianteId, id)
     except NoResultFound:
         return None
+
+def find_one_estudiante_programa(programa: str, session: Session):
+    try:
+        return session.get(EstudianteId, programa)
+    except NoResultFound:
+        return None
