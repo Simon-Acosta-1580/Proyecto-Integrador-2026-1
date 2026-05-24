@@ -1,125 +1,115 @@
-import os
-import csv
-from models import TurnoBase, TurnoId
-from fastapi import HTTPException
-from typing import Optional
-
-CSV_FILE = "Turno.csv"
-columns = ["id", "codigo", "hora_inicio", "horario", "activo"]
-
-def newID():
-    if not os.path.exists(CSV_FILE):
-        return 1
-    try:
-        with open(CSV_FILE, mode="r", newline='') as file:
-            reader = csv.DictReader(file)
-            ids = [int(row["id"]) for row in reader]
-            return max(ids) + 1 if ids else 1
-    except (FileNotFoundError, csv.Error, ValueError):
-        return 1
-
-def saveTurnoID(turno: TurnoId):
-    file_exists = os.path.exists(CSV_FILE)
-    with open(CSV_FILE, mode="a", newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(turno.model_dump())
-
-def createTurno(turno: TurnoBase):
-    existing_turnos = getAllTurnos()
-
-    for t in existing_turnos:
-        if t.activo == True and t.codigo == turno.codigo:
-            raise HTTPException(status_code=400, detail=f"El turno con código {turno.codigo} ya existe.")
-
-    id = newID()
-    new_turno = TurnoId(id=id, **turno.model_dump(exclude={'id'}))
-    saveTurnoID(new_turno)
-    return new_turno
-def getAllTurnos():
-    if not os.path.exists(CSV_FILE):
-        return []
-    try:
-        with open(CSV_FILE, mode="r", newline='') as file:
-            reader = csv.DictReader(file)
-            return [TurnoId(**row) for row in reader]
-    except (FileNotFoundError, csv.Error):
-        return []
-
-def showTurnos():
-    all_turnos = getAllTurnos()
-    return [turno for turno in all_turnos if turno.activo is True or str(turno.activo).lower() == 'true']
-
-def showTurnosInactivos():
-    all_turnos = getAllTurnos()
-    return [turno for turno in all_turnos if turno.activo is False or str(turno.activo).lower() == 'false']
-
-def showTurno(id:int):
-    with open(CSV_FILE) as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if int(row["id"]) == id:
-                return TurnoId(**row)
+from sqlmodel import Session, select
+from models import TurnoBase, TurnoId, TurnoUpdate, EstudianteId, ImplementoId
 
 
-def getTurnosByHorario(tipo_horario: str):
-    tipo_horario = tipo_horario.lower()
-
-    if tipo_horario not in ["diurno", "nocturno"]:
+def createTurno(turno: TurnoBase, session: Session):
+    estudiante = session.get(EstudianteId, turno.estudiante_id)
+    if not estudiante or not estudiante.activo:
         return None
 
-    all_turnos = getAllTurnos()
-    busqueda = [t for t in all_turnos if t.horario.lower() == tipo_horario and t.activo]
+    implemento = session.get(ImplementoId, turno.implemento_id)
+    if not implemento or not implemento.activo:
+        return None
 
-    return busqueda
+    statement = select(TurnoId).where(TurnoId.codigo == turno.codigo)
+    existing_turno = session.exec(statement).first()
+    if existing_turno:
+        return None
 
-def deleteTurno(id: int):
-    turno_deleted: Optional[TurnoId] = None
-    turnos = getAllTurnos()
+    new_turno = TurnoId.model_validate(turno)
+    session.add(new_turno)
 
-    with open(CSV_FILE, mode="w", newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
-        writer.writeheader()
+    estudiante.activo = False
+    implemento.activo = False
+    session.add(estudiante)
+    session.add(implemento)
 
-        for turno in turnos:
-            if int(turno.id) == id:
-                turno.activo = False
-                turno_deleted = turno
+    session.commit()
+    session.refresh(new_turno)
+    return new_turno
 
-            writer.writerow(turno.model_dump())
 
-    return turno_deleted
+def get_active_turnos(session: Session):
+    statement = select(TurnoId).where(TurnoId.activo == True)
+    return session.exec(statement).all()
 
-def updateTurno(id: int, turno_actualizado: TurnoBase) -> Optional[TurnoId]:
-    turnos = getAllTurnos()
-    encontrado = False
-    lista_actualizada = []
-    resultado = None
 
-    for turno_existente in turnos:
-        if int(turno_existente.id) == id:
-            datos_nuevos = turno_actualizado.model_dump(exclude={'id', 'codigo', 'activo'})
+def get_inactive_turnos(session: Session):
+    statement = select(TurnoId).where(TurnoId.activo == False)
+    return session.exec(statement).all()
 
-            nuevo_turno = TurnoId(
-                id=id,
-                codigo=turno_existente.codigo,
-                activo=turno_existente.activo,
-                **datos_nuevos
-            )
 
-            lista_actualizada.append(nuevo_turno)
-            resultado = nuevo_turno
-            encontrado = True
-        else:
-            lista_actualizada.append(turno_existente)
+def find_one_turno(id: int, session: Session):
+    return session.get(TurnoId, id)
 
-    if encontrado:
-        with open(CSV_FILE, mode="w", newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=columns)
-            writer.writeheader()
-            for e in lista_actualizada:
-                writer.writerow(e.model_dump())
-        return resultado
 
-    return None
+def find_one_turno_horario(horario: str, session: Session):
+    statement = select(TurnoId).where(TurnoId.horario == horario)
+    return session.exec(statement).first()
+
+
+def update_one_turno(id: int, new_turno: TurnoUpdate, session: Session):
+    turno_db = session.get(TurnoId, id)
+    if not turno_db:
+        return None
+
+    try:
+        update_data = new_turno.model_dump(exclude_unset=True)
+        turno_db.sqlmodel_update(update_data)
+
+        session.add(turno_db)
+        session.commit()
+        session.refresh(turno_db)
+        return turno_db
+    except Exception:
+        session.rollback()
+        return None
+
+
+def delete_turno(id: int, session: Session):
+    turno_db = session.get(TurnoId, id)
+    if not turno_db:
+        return None
+
+    turno_db.activo = False
+    session.add(turno_db)
+
+    estudiante = session.get(EstudianteId, turno_db.estudiante_id)
+    implemento = session.get(ImplementoId, turno_db.implemento_id)
+
+    if estudiante:
+        estudiante.activo = True
+        session.add(estudiante)
+    if implemento:
+        implemento.activo = True
+        session.add(implemento)
+
+    session.commit()
+    session.refresh(turno_db)
+    return turno_db
+
+
+def reactivate_turno(id: int, session: Session):
+    turno_db = session.get(TurnoId, id)
+    if not turno_db:
+        return None
+
+    estudiante = session.get(EstudianteId, turno_db.estudiante_id)
+    implemento = session.get(ImplementoId, turno_db.implemento_id)
+
+    if (estudiante and not estudiante.activo) or (implemento and not implemento.activo):
+        return None
+
+    turno_db.activo = True
+    session.add(turno_db)
+
+    if estudiante:
+        estudiante.activo = False
+        session.add(estudiante)
+    if implemento:
+        implemento.activo = False
+        session.add(implemento)
+
+    session.commit()
+    session.refresh(turno_db)
+    return turno_db
