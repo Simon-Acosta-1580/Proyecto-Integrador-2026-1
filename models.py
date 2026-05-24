@@ -27,8 +27,14 @@ class ImplementoBase(SQLModel):
     categoria: Categoria = Field(..., min_length=1, max_length=50)
     activo: bool = True
 
-class ImplementoId(ImplementoBase):
-    id: int = Field(..., gt=0)
+class ImplementoId(ImplementoBase, table=True):
+    id: int = Field(default=None, primary_key=True, gt=0)
+
+class ImplementoUpdate(ImplementoBase):
+    nombre: str = Field(default=None, min_length=1, max_length=50)
+    codigo: int = Field(None, exclude=True)
+    categoria: Categoria = Field(..., min_length=1, max_length=50)
+    activo: bool = Field(None, exclude=True)
 
 class TurnoBase(SQLModel):
     codigo: int = Field(..., gt=0)

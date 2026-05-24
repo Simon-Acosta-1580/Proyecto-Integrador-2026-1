@@ -1,126 +1,91 @@
-import os
-import csv
-from fastapi import HTTPException
-from models import ImplementoBase, ImplementoId
-from typing import Optional
+from models import ImplementoBase, ImplementoId, ImplementoUpdate
+from sqlalchemy.exc import NoResultFound
+from sqlmodel import Session, select
 
-CSV_FILE = "implemento.csv"
-columns = ["id", "nombre", "codigo", "categoria", "activo"]
+def createImplemento(implemento: ImplementoBase, session: Session):
+    statement = select(ImplementoId).where(ImplementoId.codigo == implemento.codigo)
+    existing_implemento = session.exec(statement).first()
 
-def newID():
-    if not os.path.exists(CSV_FILE):
-        return 1
-    try:
-        with open(CSV_FILE, mode="r", newline='') as file:
-            reader = csv.DictReader(file)
-            ids = [int(row["id"]) for row in reader]
-            return max(ids) + 1 if ids else 1
-    except (FileNotFoundError, csv.Error, ValueError):
-        return 1
-
-def saveImplementoID(implemento: ImplementoId):
-    file_exists = os.path.exists(CSV_FILE)
-    with open(CSV_FILE, mode="a", newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(implemento.model_dump())
-
-def createImplemento(implemento: ImplementoId):
-    existing_implementos = getAllImplementos()
-
-    for i in existing_implementos:
-        if i.activo == True and i.codigo == implemento.codigo:
-            raise HTTPException(status_code=400, detail=f"El implemento con código {implemento.codigo} ya existe.")
-
-    id = newID()
-    new_implemento = ImplementoId(id=id, **implemento.model_dump(exclude={'id'}))
-    saveImplementoID(new_implemento)
-    return new_implemento
-
-def getAllImplementos():
-    if not os.path.exists(CSV_FILE):
-        return []
-    try:
-        with open(CSV_FILE, mode="r", newline='') as file:
-            reader = csv.DictReader(file)
-            return [ImplementoId(**row) for row in reader]
-    except (FileNotFoundError, csv.Error):
-        return []
-
-def showImplementos():
-    all_implementos = getAllImplementos()
-    return [implemento for implemento in all_implementos if implemento.activo is True or str(implemento.activo).lower() == 'true']
-
-def showImplementosInactivos():
-    all_implementos = getAllImplementos()
-    return [implemento for implemento in all_implementos if implemento.activo is False or str(implemento.activo).lower() == 'false']
-
-def showImplemento(id:int):
-    with open(CSV_FILE) as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if int(row["id"]) == id:
-                return ImplementoId(**row)
-
-def getImplementoByCategoria(tipo_categoria: str):
-    tipo_categoria = tipo_categoria.lower()
-
-    if tipo_categoria not in ["balon", "instrumento", "juego", "cancha"]:
+    if existing_implemento:
         return None
 
-    all_implementos = getAllImplementos()
-    busqueda = [i for i in all_implementos if i.categoria.lower() == tipo_categoria and i.activo]
+    new_implemento = ImplementoId.model_validate(implemento)
+    session.add(new_implemento)
+    session.commit()
+    session.refresh(new_implemento)
+    return new_implemento
 
-    return busqueda
 
-def deleteImplemento(id: int):
-    implemento_deleted: Optional[ImplementoId] = None
-    implementos = getAllImplementos()
+def get_active_implements(session: Session):
+    statement = select(ImplementoId).where(ImplementoId.activo == True)
+    results = session.exec(statement).all()
+    return results
 
-    with open(CSV_FILE, mode="w", newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
-        writer.writeheader()
+def get_inactive_implements(session: Session):
+    statement = select(ImplementoId).where(ImplementoId.activo == False)
+    results = session.exec(statement).all()
+    return results
 
-        for implemento in implementos:
-            if int(implemento.id) == id:
-                implemento.activo = False
-                implemento_deleted = implemento
+def find_one_implement(id: int, session: Session):
+    try:
+        return session.get(ImplementoId, id)
+    except NoResultFound:
+        return None
 
-            writer.writerow(implemento.model_dump())
+def find_one_implement_category(categoria: str, session: Session):
+    try:
+        statement = select(ImplementoId).where(ImplementoId.categoria == categoria)
+        result = session.exec(statement).first()
+        return result
+    except Exception:
+        return None
 
-    return implemento_deleted
+def update_one_implement(id: int, new_implemento: ImplementoUpdate, session: Session):
+    implemento_db = session.get(ImplementoId, id)
 
-def updateImplemento(id: int, implemento_actualizado: ImplementoBase) -> Optional[ImplementoId]:
-    implementos = getAllImplementos()
-    encontrado = False
-    lista_actualizada = []
-    resultado = None
+    if not implemento_db:
+        return None
 
-    for implemento_existente in implementos:
-        if int(implemento_existente.id) == id:
-            datos_nuevos = implemento_actualizado.model_dump(exclude={'id', 'codigo', 'activo'})
+    try:
+        update_data = new_implemento.model_dump(exclude_unset=True)
 
-            nuevo_implemento = ImplementoId(
-                id=id,
-                codigo=implemento_existente.codigo,
-                activo=implemento_existente.activo,
-                **datos_nuevos
-            )
+        implemento_db.sqlmodel_update(update_data)
 
-            lista_actualizada.append(nuevo_implemento)
-            resultado = nuevo_implemento
-            encontrado = True
-        else:
-            lista_actualizada.append(implemento_existente)
+        session.add(implemento_db)
+        session.commit()
+        session.refresh(implemento_db)
+        return implemento_db
 
-    if encontrado:
-        with open(CSV_FILE, mode="w", newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=columns)
-            writer.writeheader()
-            for e in lista_actualizada:
-                writer.writerow(e.model_dump())
-        return resultado
+    except Exception as e:
+        return None
 
-    return None
+def delete_implement(id: int, session: Session):
+    implemento_db = session.get(ImplementoId, id)
+
+    if not implemento_db:
+        return None
+
+    implemento_db.activo = False
+
+    session.add(implemento_db)
+    session.commit()
+    session.refresh(implemento_db)
+
+    return implemento_db
+
+def reactivate_implement(id: int, session: Session):
+    implemento_db = session.get(ImplementoId, id)
+
+    if not implemento_db:
+        return None
+
+    implemento_db.activo = True
+
+    session.add(implemento_db)
+    session.commit()
+    session.refresh(implemento_db)
+
+    return implemento_db
+
+
 
