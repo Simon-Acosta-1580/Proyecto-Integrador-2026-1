@@ -1,6 +1,6 @@
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, select
-from models import EstudianteBase, EstudianteId, EstudianteUpdate
+from models import EstudianteBase, EstudianteId, EstudianteUpdate, TurnoId
 
 
 def createEstudiante(estudiante: EstudianteBase, session: Session):
@@ -78,6 +78,15 @@ def reactivate_estudiante(id: int, session: Session):
     estudiante_db = session.get(EstudianteId, id)
 
     if not estudiante_db:
+        return None
+
+    statement = select(TurnoId).where(
+        TurnoId.implemento_id == id,
+        TurnoId.activo == True
+    )
+    turno_activo_con_estudiante = session.exec(statement).first()
+
+    if turno_activo_con_estudiante:
         return None
 
     estudiante_db.activo = True

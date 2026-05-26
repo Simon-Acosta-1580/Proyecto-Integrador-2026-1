@@ -68,7 +68,7 @@ def rehabilitar_estudiante(id: int, session: SessionDep):
     estudiante = reactivate_estudiante(id, session)
 
     if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado, verifique que estudiante no forme parte de un turno activo")
 
     return estudiante
 
@@ -128,7 +128,7 @@ def rehabilitar_implemento(id: int, session: SessionDep):
     implemento = reactivate_implement(id, session)
 
     if not implemento:
-        raise HTTPException(status_code=404, detail="Implemento no encontrado")
+        raise HTTPException(status_code=404, detail="Implemento no encontrado, verifique que no forma parte de un turno activo")
 
     return implemento
 

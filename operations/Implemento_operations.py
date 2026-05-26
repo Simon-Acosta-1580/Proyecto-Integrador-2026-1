@@ -1,4 +1,4 @@
-from models import ImplementoBase, ImplementoId, ImplementoUpdate
+from models import ImplementoBase, ImplementoId, ImplementoUpdate, TurnoId
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, select
 
@@ -77,6 +77,15 @@ def reactivate_implement(id: int, session: Session):
     implemento_db = session.get(ImplementoId, id)
 
     if not implemento_db:
+        return None
+
+    statement = select(TurnoId).where(
+        TurnoId.implemento_id == id,
+        TurnoId.activo == True
+    )
+    turno_activo_con_implemento = session.exec(statement).first()
+
+    if turno_activo_con_implemento:
         return None
 
     implemento_db.activo = True
