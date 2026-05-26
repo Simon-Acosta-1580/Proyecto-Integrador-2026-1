@@ -1,12 +1,23 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_programa, update_one_student, delete_student, reactivate_estudiante
 from operations.Implemento_operations import createImplemento, get_active_implements, get_inactive_implements, find_one_implement, find_one_implement_category, update_one_implement, delete_implement, reactivate_implement
 from operations.turno_Operations import createTurno, get_active_turnos, get_inactive_turnos, find_one_turno, find_one_turno_horario, update_one_turno, delete_turno, reactivate_turno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId,ImplementoUpdate, TurnoBase, TurnoId, TurnoUpdate
 from sqlmodel import Session
 from db import SessionDep, create_all_tables
+from utils import save_img_local, save_img_remote
 
 app = FastAPI(lifespan=create_all_tables)
+
+@app.post("/image/local")
+async def image_save_local(img: UploadFile = File(...)):
+    path = save_img_local(img)
+    return {"path for your image": path}
+
+@app.post("/image/remote")
+async def image_save_remote(file:UploadFile = File(...)):
+    url_img = save_img_remote(file)
+    return {"url for your image":url_img}
 
 @app.get("/hola", tags=["saludo"])
 def hola():
