@@ -53,14 +53,45 @@ def update_one_turno(id: int, new_turno: TurnoUpdate, session: Session):
     if not turno_db:
         return None
 
+    estudiante_id_viejo = turno_db.estudiante_id
+    implemento_id_viejo = turno_db.implemento_id
+
     try:
         update_data = new_turno.model_dump(exclude_unset=True)
-        turno_db.sqlmodel_update(update_data)
 
+        if "estudiante_id" in update_data and update_data["estudiante_id"] != estudiante_id_viejo:
+            nuevo_estudiante = session.get(EstudianteId, update_data["estudiante_id"])
+            if not nuevo_estudiante or not nuevo_estudiante.activo:
+                return None
+
+            nuevo_estudiante.activo = False
+            session.add(nuevo_estudiante)
+
+            estudiante_viejo = session.get(EstudianteId, estudiante_id_viejo)
+            if estudiante_viejo:
+                estudiante_viejo.activo = True
+                session.add(estudiante_viejo)
+
+        if "implemento_id" in update_data and update_data["implemento_id"] != implemento_id_viejo:
+            nuevo_implemento = session.get(ImplementoId, update_data["implemento_id"])
+            if not nuevo_implemento or not nuevo_implemento.activo:
+                return None
+
+            nuevo_implemento.activo = False
+            session.add(nuevo_implemento)
+
+            implemento_viejo = session.get(ImplementoId, implemento_id_viejo)
+            if implemento_viejo:
+                implemento_viejo.activo = True
+                session.add(implemento_viejo)
+
+        turno_db.sqlmodel_update(update_data)
         session.add(turno_db)
+
         session.commit()
         session.refresh(turno_db)
         return turno_db
+
     except Exception:
         session.rollback()
         return None

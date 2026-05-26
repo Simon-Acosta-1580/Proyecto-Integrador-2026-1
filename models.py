@@ -1,10 +1,12 @@
 from pydantic import model_validator
 from atributos.ProgramaEstudio import Carrera
 from atributos.categoriaImplemento import Categoria
-from atributos.horarioTurno import Horario
 from email.policy import default
 from typing import Optional
 from sqlmodel import SQLModel, Field
+from zoneinfo import ZoneInfo
+from datetime import datetime
+from sqlalchemy import text, DateTime
 
 class EstudianteBase(SQLModel):
     nombre: str = Field(default=None, min_length=1, max_length=50)
@@ -40,45 +42,19 @@ class TurnoBase(SQLModel):
     estudiante_id: int = Field(foreign_key="estudianteid.id")
     implemento_id: int = Field(foreign_key="implementoid.id")
     codigo: int = Field(..., gt=0)
-    hora_inicio: int = Field(..., gt=8, le=19)
-    horario: Horario = Field(..., min_length=1, max_length=50)
     activo: bool = True
-
-    @model_validator(mode='after')
-    def validar_consistencia_horario(self):
-        horario_str = self.horario.lower() if isinstance(self.horario, str) else getattr(self.horario, 'value',
-                                                                                         '').lower()
-
-        if "diurno" in horario_str:
-            if self.hora_inicio >= 18:
-                raise ValueError("Los turnos de tipo 'Diurno' no pueden iniciar después de las 18 horas.")
-
-        elif "nocturno" in horario_str:
-            if self.hora_inicio < 18:
-                raise ValueError(
-                    "Los turnos de tipo 'Nocturno' deben ingresarse en formato de 24 horas (ej. 21 en lugar de 9) y empezar a partir de las 18 horas.")
-
-        return self
 
 class TurnoId(TurnoBase, table=True):
     id: int = Field(default=None, primary_key=True, gt=0)
+    hora_inicio: datetime = Field(
+        sa_type=DateTime,
+        default_factory=lambda: datetime.now(ZoneInfo("America/Bogota")).replace(tzinfo=None),
+        sa_column_kwargs={"server_default": text("CAST(timezone('America/Bogota', NOW()) AS TIMESTAMP)")}
+    )
+
+class TurnoCreate(TurnoBase):
+    pass
 
 class TurnoUpdate(SQLModel):
-    hora_inicio: Optional[int] = Field(default=None, gt=8, le=19)
-    horario: Optional[Horario] = Field(default=None, min_length=1, max_length=50)
-
-    @model_validator(mode='after')
-    def validar_consistencia_horario(self):
-        horario_str = self.horario.lower() if isinstance(self.horario, str) else getattr(self.horario, 'value',
-                                                                                         '').lower()
-
-        if "diurno" in horario_str:
-            if self.hora_inicio >= 18:
-                raise ValueError("Los turnos de tipo 'Diurno' no pueden iniciar después de las 18 horas.")
-
-        elif "nocturno" in horario_str:
-            if self.hora_inicio < 18:
-                raise ValueError(
-                    "Los turnos de tipo 'Nocturno' deben ingresarse en formato de 24 horas (ej. 21 en lugar de 9) y empezar a partir de las 18 horas.")
-
-        return self
+    estudiante_id: int = Field(foreign_key="estudianteid.id")
+    implemento_id: int = Field(foreign_key="implementoid.id")
