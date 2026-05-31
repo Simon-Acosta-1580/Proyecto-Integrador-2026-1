@@ -12,31 +12,32 @@ class EstudianteBase(SQLModel):
     nombre: str = Field(default=None, min_length=1, max_length=50)
     programa: Carrera = Field(default=None, min_length=1, max_length=50)
     codigo: int = Field(default=None, gt=0)
-    activo: bool = True
+    imagen: str | None = Field(default=None)
 
 class EstudianteId(EstudianteBase, table=True):
     id: int = Field(default=None, primary_key=True, gt=0)
+    activo: bool = True
 
 class EstudianteUpdate(EstudianteBase):
     nombre: str = Field(default=None, min_length=1, max_length=50)
     programa: Carrera = Field(default=None, min_length=1, max_length=50)
-    codigo: int = Field(None, exclude=True)
-    activo: bool = Field(None, exclude=True)
+    imagen: str | None = Field(default=None)
 
 class ImplementoBase(SQLModel):
     nombre: str = Field(..., min_length=1, max_length=50)
     codigo: int = Field(..., gt=0)
     categoria: Categoria = Field(..., min_length=1, max_length=50)
-    activo: bool = True
+    imagen: str | None = Field(default=None)
+
 
 class ImplementoId(ImplementoBase, table=True):
     id: int = Field(default=None, primary_key=True, gt=0)
+    activo: bool = True
 
 class ImplementoUpdate(ImplementoBase):
     nombre: str = Field(default=None, min_length=1, max_length=50)
-    codigo: int = Field(None, exclude=True)
     categoria: Categoria = Field(..., min_length=1, max_length=50)
-    activo: bool = Field(None, exclude=True)
+    imagen: str | None = Field(default=None)
 
 class TurnoBase(SQLModel):
     estudiante_id: int = Field(foreign_key="estudianteid.id")

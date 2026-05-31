@@ -1,13 +1,20 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
+from starlette.responses import RedirectResponse
+
 from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_programa, update_one_student, delete_student, reactivate_estudiante
 from operations.Implemento_operations import createImplemento, get_active_implements, get_inactive_implements, find_one_implement, find_one_implement_category, update_one_implement, delete_implement, reactivate_implement
 from operations.turno_Operations import createTurno, get_active_turnos, get_inactive_turnos, find_one_turno, find_one_turno_horario, update_one_turno, delete_turno, reactivate_turno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId,ImplementoUpdate, TurnoBase, TurnoId, TurnoUpdate
 from sqlmodel import Session
-from db import SessionDep, create_all_tables
+from db import SessionDep, create_all_tables, get_session
 from utils import save_img_local, save_img_remote
+from typing import Optional
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI(lifespan=create_all_tables)
+
+templates = Jinja2Templates(directory="templates")
 
 @app.post("/image/local")
 async def image_save_local(img: UploadFile = File(...)):
@@ -23,12 +30,40 @@ async def image_save_remote(file:UploadFile = File(...)):
 def hola():
     return {"message": "Hello World"}
 
-@app.post("/estudiante", response_model=EstudianteId, tags=["Estudiantes"])
-async def create_estudiante(estudiante: EstudianteBase, session: SessionDep):
-    new_estudiante=createEstudiante(estudiante, session)
+@app.get("/", response_class=HTMLResponse)
+async def templating(request: Request):
+    return templates.TemplateResponse(
+        request, "index.html"
+    )
+
+@app.get("/estudiante/nuevo", response_class=HTMLResponse, tags=["Vistas HTML"])
+async def mostrar_formulario_estudiante(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="crear_estudiante.html"
+    )
+
+@app.post("/estudiante/nuevo", response_class=HTMLResponse, tags=["Estudiantes"])
+async def create_estudiante(
+        codigo: int = Form(...),
+        nombre: str = Form(...),
+        programa: str = Form(...),
+        file: Optional[UploadFile] = File(None),
+        session: Session = Depends(get_session)
+):
+    url_supabase = None
+    if file:
+        url_supabase = await save_img_remote(file)
+
+    estudiante_base = EstudianteBase(codigo=codigo, nombre=nombre, programa=programa)
+
+    new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
+
     if not new_estudiante:
-        raise HTTPException(status_code=409, detail=f"El estudiante con código {estudiante.codigo} ya existe.")
-    return new_estudiante
+        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
+
+    return RedirectResponse(new_estudiante)
+
 
 @app.get("/estudiantes", response_model=list[EstudianteId], tags=["Estudiantes"])
 async def read_estudiantes(session: SessionDep):
@@ -58,12 +93,36 @@ async def show_one_estudiante(id: int, session: SessionDep):
         raise HTTPException(status_code=404,detail=f"No se encontro estudiante con id: {id}")
     return estudiante
 
-@app.patch("/estudiante/{id}", response_model=EstudianteId, response_model_exclude={"id", "activo"}, tags=["Estudiantes"])
-async def update_estudiante(id: int, estudiante: EstudianteUpdate, session: SessionDep):
-    update = update_one_student(id, estudiante, session)
-    if not (update):
-        raise HTTPException(status_code=404, detail=f"{id} Estudiante not found")
-    return update
+
+@app.patch("/estudiante/{id}", response_model=EstudianteId, response_model_exclude={"id", "activo"},
+           tags=["Estudiantes"])
+async def update_estudiante(
+        id: int,
+        nombre: Optional[str] = Form(None),
+        programa: Optional[str] = Form(None),
+        file: Optional[UploadFile] = File(None),
+        session: SessionDep = None
+):
+    estudiante_db = session.get(EstudianteId, id)
+    if not estudiante_db:
+        raise HTTPException(status_code=404, detail=f"Estudiante con ID {id} no encontrado")
+
+    url_supabase = None
+    if file and file.filename:
+        try:
+            url_supabase = save_img_remote(file)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error al subir la nueva imagen a Supabase: {str(e)}"
+            )
+    estudiante_update = EstudianteUpdate(
+        nombre=nombre,
+        programa=programa
+    )
+    updated_student = update_one_student(id, estudiante_update, session, imagen_url=url_supabase)
+
+    return updated_student
 
 @app.delete("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
 async def delete_estudiante(id: int, session: SessionDep):
@@ -84,11 +143,25 @@ def rehabilitar_estudiante(id: int, session: SessionDep):
     return estudiante
 
 @app.post("/implemento", response_model=ImplementoId, tags=["Implementos"])
-async def create_implement(implemento: ImplementoBase, session: SessionDep):
-    new_implemento=createImplemento(implemento, session)
-    if not new_implemento:
-        raise HTTPException(status_code=409, detail=f"El implemento con código {implemento.codigo} ya existe.")
-    return new_implemento
+async def create_implemento(
+        codigo: int = Form(...),
+        nombre: str = Form(...),
+        categoria: str = Form(...),
+        file: Optional[UploadFile] = File(None),
+        session: SessionDep = None
+):
+    url_supabase = None
+    if file:
+        url_supabase = save_img_remote(file)
+
+    implemento_base = ImplementoBase(codigo=codigo, nombre=nombre, categoria=categoria)
+
+    new_implement = createImplemento(implemento_base, session, imagen_url=url_supabase)
+
+    if not new_implement:
+        raise HTTPException(status_code=409, detail=f"El implemento con código {codigo} ya existe.")
+
+    return new_implement
 
 @app.get("/implementos", response_model=list[ImplementoId], tags=["Implementos"])
 async def read_implements(session: SessionDep):
@@ -118,12 +191,35 @@ async def show_one_implement(id: int, session: SessionDep):
         raise HTTPException(status_code=404,detail=f"No se encontro implemento con id: {id}")
     return implemento
 
-@app.patch("/implemento/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"}, tags=["Implementos"])
-async def update_implemento(id: int, implemento: ImplementoUpdate, session: SessionDep):
-    updatei = update_one_implement(id, implemento, session)
-    if not (updatei):
-        raise HTTPException(status_code=404, detail=f"{id} Implemento not found")
-    return updatei
+@app.patch("/implemento/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"},
+           tags=["Implementos"])
+async def update_implemento(
+        id: int,
+        nombre: Optional[str] = Form(None),
+        categoria: Optional[str] = Form(None),
+        file: Optional[UploadFile] = File(None),
+        session: SessionDep = None
+):
+    implemento_db = session.get(ImplementoId, id)
+    if not implemento_db:
+        raise HTTPException(status_code=404, detail=f"Implemento con ID {id} no encontrado")
+
+    url_supabase = None
+    if file and file.filename:
+        try:
+            url_supabase = save_img_remote(file)
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error al subir la nueva imagen a Supabase: {str(e)}"
+            )
+    implemento_update = EstudianteUpdate(
+        nombre=nombre,
+        categoria=categoria
+    )
+    updated_implement = update_one_implement(id, implemento_update, session, imagen_url=url_supabase)
+
+    return updated_implement
 
 @app.delete("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
 async def delete_implemento(id: int, session: SessionDep):
@@ -211,3 +307,58 @@ async def rehabilitar_turno(id: int, session: SessionDep):
             detail="No se pudo rehabilitar el turno. Puede que no exista o que el estudiante/implemento ya estén asignados."
         )
     return turno
+
+@app.post("/estudiante", response_model=EstudianteId, tags=["Estudiantes"])
+async def create_estudiante(
+        codigo: int = Form(...),
+        nombre: str = Form(...),
+        programa: str = Form(...),
+        file: Optional[UploadFile] = File(None),
+        session: SessionDep = None
+):
+    url_supabase = None
+    if file:
+        url_supabase = save_img_remote(file)
+
+    estudiante_base = EstudianteBase(codigo=codigo, nombre=nombre, programa=programa)
+
+    new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
+
+    if not new_estudiante:
+        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
+
+    return new_estudiante
+
+@app.get("/", response_class=HTMLResponse)
+async def templating(request: Request):
+    return templates.TemplateResponse(
+        request, "index.html"
+    )
+
+@app.get("/estudiante/nuevo", response_class=HTMLResponse, tags=["Vistas HTML"])
+async def mostrar_formulario_estudiante(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="crear_estudiante.html"
+    )
+
+@app.post("/estudiante/nuevo", response_class=HTMLResponse, tags=["Estudiantes"])
+async def create_estudiante(
+        codigo: int = Form(...),
+        nombre: str = Form(...),
+        programa: str = Form(...),
+        file: Optional[UploadFile] = File(None),
+        session: SessionDep = None
+):
+    url_supabase = None
+    if file:
+        url_supabase = save_img_remote(file)
+
+    estudiante_base = EstudianteBase(codigo=codigo, nombre=nombre, programa=programa)
+
+    new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
+
+    if not new_estudiante:
+        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
+
+    return new_estudiante

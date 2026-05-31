@@ -1,15 +1,21 @@
 from models import ImplementoBase, ImplementoId, ImplementoUpdate, TurnoId
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, select
+from typing import Optional
 
-def createImplemento(implemento: ImplementoBase, session: Session):
-    statement = select(ImplementoId).where(ImplementoId.codigo == implemento.codigo)
-    existing_implemento = session.exec(statement).first()
-
-    if existing_implemento:
+def createImplemento(implemento_data: ImplementoBase, session: Session, imagen_url: Optional[str] = None):
+    statement = select(ImplementoId).where(ImplementoId.codigo == implemento_data.codigo)
+    db_implemento = session.exec(statement).first()
+    if db_implemento:
         return None
 
-    new_implemento = ImplementoId.model_validate(implemento)
+    new_implemento = ImplementoId(
+        codigo=implemento_data.codigo,
+        nombre=implemento_data.nombre,
+        categoria=implemento_data.categoria,
+        imagen=imagen_url
+    )
+
     session.add(new_implemento)
     session.commit()
     session.refresh(new_implemento)
@@ -40,24 +46,22 @@ def find_one_implement_category(categoria: str, session: Session):
     except Exception:
         return None
 
-def update_one_implement(id: int, new_implemento: ImplementoUpdate, session: Session):
+def update_one_implement(id: int, implemento_data: ImplementoUpdate, session: Session, imagen_url: Optional[str] = None):
     implemento_db = session.get(ImplementoId, id)
-
     if not implemento_db:
         return None
 
-    try:
-        update_data = new_implemento.model_dump(exclude_unset=True)
+    data_dict = implemento_data.model_dump(exclude_unset=True)
+    for key, value in data_dict.items():
+        setattr(implemento_db, key, value)
 
-        implemento_db.sqlmodel_update(update_data)
+    if imagen_url:
+        implemento_db.imagen = imagen_url
 
-        session.add(implemento_db)
-        session.commit()
-        session.refresh(implemento_db)
-        return implemento_db
-
-    except Exception as e:
-        return None
+    session.add(implemento_db)
+    session.commit()
+    session.refresh(implemento_db)
+    return implemento_db
 
 def delete_implement(id: int, session: Session):
     implemento_db = session.get(ImplementoId, id)

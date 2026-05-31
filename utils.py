@@ -1,4 +1,5 @@
 import os
+import uuid
 from supabase import create_client
 from dotenv import load_dotenv
 from pathlib import Path
@@ -8,20 +9,21 @@ from fastapi import File, UploadFile, HTTPException
 load_dotenv()
 
 IMG_DIR = Path("files/img")
-SUPABASE_BUCKET=os.getenv("SUPABASE_BUCKET")
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET")
 
 
-def save_img_local(file:UploadFile):
+def save_img_local(file: UploadFile):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Archivo Invalido")
 
     IMG_DIR.mkdir(parents=True, exist_ok=True)
-    dest = IMG_DIR/file.filename
+    dest = IMG_DIR / file.filename
 
     with dest.open("wb") as store:
         shutil.copyfileobj(file.file, store)
 
     return dest
+
 
 ## SUPABASE
 def supabase_client():
@@ -33,24 +35,29 @@ def supabase_client():
     return create_client(url, key)
 
 
-def save_img_remote(file: UploadFile):
+async def save_img_remote(file: UploadFile):  # Asegúrate de que tenga el async
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Archivo Invalido")
 
-    contents = file.file.read()
+    # SOLUCIÓN: Leer el archivo de forma asíncrona sin bloquear el servidor
+    contents = await file.read()
 
-    path = f"img/{file.filename}"
+    # Generar un nombre único usando UUID
+    extension = Path(file.filename).suffix
+    nombre_unico = f"{uuid.uuid4()}{extension}"
+    path = f"img/{nombre_unico}"
 
     supa_client = supabase_client()
 
+    # Como el cliente de Supabase de Python suele ser síncrono, lo dejamos igual
     response = supa_client.storage.from_(SUPABASE_BUCKET).upload(
         path=path,
         file=contents,
-        file_options={"content-type":file.content_type},
+        file_options={
+            "content-type": file.content_type,
+            "upsert": "true"
+        },
     )
-    stored_url_bucket=(supa_client.
-                       storage.
-                       from_(SUPABASE_BUCKET).
-                       get_public_url(path))
 
+    stored_url_bucket = supa_client.storage.from_(SUPABASE_BUCKET).get_public_url(path)
     return stored_url_bucket
