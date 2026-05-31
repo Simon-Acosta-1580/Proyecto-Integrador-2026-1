@@ -47,6 +47,14 @@ def find_one_estudiante_programa(programa: str, session: Session):
     except Exception:
         return None
 
+def find_one_estudiante_codigo(codigo: int, session: Session):
+    try:
+        statement = select(EstudianteId).where(EstudianteId.codigo == codigo)
+        result = session.exec(statement).first()
+        return result
+    except Exception:
+        return None
+
 
 def update_one_student(id: int, estudiante_data: EstudianteUpdate, session: Session, imagen_url: Optional[str] = None):
     estudiante_db = session.get(EstudianteId, id)

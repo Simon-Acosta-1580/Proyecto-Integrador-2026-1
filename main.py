@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
 from starlette.responses import RedirectResponse
 
-from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_programa, update_one_student, delete_student, reactivate_estudiante
+from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_programa, find_one_estudiante_codigo, update_one_student, delete_student, reactivate_estudiante
 from operations.Implemento_operations import createImplemento, get_active_implements, get_inactive_implements, find_one_implement, find_one_implement_category, update_one_implement, delete_implement, reactivate_implement
 from operations.turno_Operations import createTurno, get_active_turnos, get_inactive_turnos, find_one_turno, find_one_turno_horario, update_one_turno, delete_turno, reactivate_turno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId,ImplementoUpdate, TurnoBase, TurnoId, TurnoUpdate
@@ -84,6 +84,16 @@ async def show_estudiantes_programa(programa: str, session: SessionDep):
     estudiante = find_one_estudiante_programa(programa, session)
     if not estudiante:
         raise HTTPException(status_code=404, detail=f"No se encontro estudiante del programa: {programa}")
+    return estudiante
+
+@app.get("/estudiante/buscar/codigo", response_model=EstudianteId, tags=["Estudiantes"])
+async def show_one_estudiante_codigo(codigo: int, session: SessionDep):
+    estudiante = find_one_estudiante_codigo(codigo, session)
+    if not estudiante:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontro estudiante con el codigo: {codigo}"
+        )
     return estudiante
 
 @app.get("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
