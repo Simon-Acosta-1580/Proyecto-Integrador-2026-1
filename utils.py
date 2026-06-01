@@ -59,5 +59,11 @@ async def save_img_remote(file: UploadFile):  # Asegúrate de que tenga el async
         },
     )
 
+    # --- AQUÍ ESTÁ EL CAMBIO ---
     stored_url_bucket = supa_client.storage.from_(SUPABASE_BUCKET).get_public_url(path)
+
+    # Nos aseguramos de limpiar cualquier comilla extra si Supabase la devuelve como string
+    if isinstance(stored_url_bucket, str):
+        stored_url_bucket = stored_url_bucket.strip('"\'')
+
     return stored_url_bucket

@@ -39,13 +39,6 @@ def find_one_estudiante(id: int, session: Session):
     except NoResultFound:
         return None
 
-def find_one_estudiante_programa(programa: str, session: Session):
-    try:
-        statement = select(EstudianteId).where(EstudianteId.programa == programa)
-        result = session.exec(statement).first()
-        return result
-    except Exception:
-        return None
 
 def find_one_estudiante_codigo(codigo: int, session: Session):
     try:

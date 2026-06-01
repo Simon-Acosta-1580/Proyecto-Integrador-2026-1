@@ -1,0 +1,12 @@
+{% extends 'estudiante_base.html' %}
+{% block subcontent %}
+
+<div class="students-grid">
+    {% for estudiante in lista_estudiantes %}
+        <!-- Llamamos e inyectamos el componente pasándole el estudiante actual del ciclo -->
+        {% include 'estudiante_card.html' %}
+
+    {% endfor %}
+</div>
+
+{% endblock %}

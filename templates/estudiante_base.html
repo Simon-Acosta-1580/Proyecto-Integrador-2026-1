@@ -182,22 +182,6 @@
         </div>
 
         <div>
-            <label class="sidebar-title"><i class="fa-solid fa-filter me-2"></i>Filtrar por Programa</label>
-            <form action="/estudiante/buscar" method="GET" id="filterProgramForm">
-                <div class="sidebar-input-group">
-                    <span class="sidebar-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-                    <select name="programa" class="form-select sidebar-control sidebar-select" onchange="document.getElementById('filterProgramForm').submit()" required>
-                        <option value="" disabled selected>Selecciona carrera...</option>
-                        <option value="ingenieria">Ingeniería</option>
-                        <option value="derecho">Derecho</option>
-                        <option value="arquitectura">Arquitectura</option>
-                        <option value="psicologia">Psicología</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-
-        <div>
             <label class="sidebar-title"><i class="fa-solid fa-user-slash me-2"></i>Estado Académico</label>
             <form action="/estudiantesInactivos" method="GET">
                 <button type="submit" class="btn btn-inactive-search">

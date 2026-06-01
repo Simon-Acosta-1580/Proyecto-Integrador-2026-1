@@ -1,0 +1,175 @@
+{% extends 'estudiante_base.html' %}
+
+{% block subcontent %}
+<div class="ucatolica-layout-wrapper animate__animated animate__fadeIn">
+
+    <div class="profile-layout-container">
+
+        <div class="action-top-right">
+            {% if estudiante.activo %}
+                <button onclick="ejecutarAccion('/estudiante/{{ estudiante.id }}', 'DELETE')" class="btn-action btn-delete">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar Estudiante
+                </button>
+            {% else %}
+                <button onclick="ejecutarAccion('/estudiante/rehabilitar/{{ estudiante.id }}', 'PATCH')" class="btn-action btn-reactivate">
+                    <i class="fa-solid fa-arrows-rotate"></i> Rehabilitar Estudiante
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="profile-card-wrapper">
+            {% include 'estudiante_card.html' %}
+        </div>
+
+        <div class="action-bottom-left">
+            <a href="/estudiante/editar/{{ estudiante.id }}" class="btn-action btn-edit">
+                <i class="fa-solid fa-user-pen"></i> Editar Información
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* ESTA ES LA CLAVE:
+       Evitamos usar clases nativas de Bootstrap que rompan el flexbox global
+       y nos aseguramos de que el contenido use solo el espacio restante a la derecha.
+    */
+    .ucatolica-layout-wrapper {
+        width: 100%;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        box-sizing: border-box;
+    }
+
+    /* Contenedor de la tarjeta de perfil */
+    .profile-layout-container {
+        position: relative;
+        background: #ffffff !important;
+        border-radius: 16px !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 40px !important;
+        width: 100% !important;
+        max-width: 450px !important; /* Ajuste óptimo para que la tarjeta se vea estilizada */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 20px !important;
+        box-sizing: border-box;
+    }
+
+    /* Sobreescribimos el max-width de estudiante_card.html sólo dentro de esta vista */
+    .profile-card-wrapper {
+        width: 100% !important;
+        margin-top: 25px !important;
+    }
+
+    .profile-card-wrapper .student-card-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .profile-card-wrapper .student-card {
+        box-shadow: none !important; /* Quitamos la doble sombra para que no se vea recargado */
+        border: 1px solid #f1f5f9 !important;
+    }
+
+    .profile-card-wrapper .student-img-container {
+        height: 280px !important; /* Controlamos la altura de la imagen en el detalle */
+    }
+
+    /* Ubicación exacta arriba a la derecha */
+    .action-top-right {
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        display: flex !important;
+        gap: 10px !important;
+        z-index: 10 !important;
+    }
+
+    /* Ubicación abajo a la izquierda */
+    .action-bottom-left {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        margin-top: 10px !important;
+    }
+
+    /* Estilos base de los botones de acción */
+    .btn-action {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        transition: all 0.2s ease !important;
+        text-decoration: none !important;
+    }
+
+    /* Botón Eliminar */
+    .btn-delete {
+        background-color: #fee2e2 !important;
+        color: #dc2626 !important;
+    }
+    .btn-delete:hover {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+    }
+
+    /* Botón Rehabilitar */
+    .btn-reactivate {
+        background-color: #dcfce7 !important;
+        color: #16a34a !important;
+    }
+    .btn-reactivate:hover {
+        background-color: #16a34a !important;
+        color: #ffffff !important;
+    }
+
+    /* Botón Editar */
+    .btn-edit {
+        background-color: #e0f2fe !important;
+        color: #0369a1 !important;
+    }
+    .btn-edit:hover {
+        background-color: #004b87 !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<script>
+    async function ejecutarAccion(url, metodo) {
+        const confirmacion = confirm(`¿Está seguro de realizar esta acción sobre el estudiante?`);
+        if (!confirmacion) return;
+
+        try {
+            const response = await fetch(url, {
+                method: metodo,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                alert("Operación realizada con éxito.");
+                window.location.href = "/estudiantes";
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.detail || 'No se pudo completar la solicitud'}`);
+            }
+        } catch (error) {
+            console.error("Error en la petición:", error);
+            alert("Ocurrió un problema de conexión con el servidor.");
+        }
+    }
+</script>
+{% endblock %}

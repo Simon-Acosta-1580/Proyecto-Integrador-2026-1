@@ -1,0 +1,21 @@
+{% extends 'estudiante_base.html' %}
+
+{% block subcontent %}
+<div class="ucatolica-layout-wrapper animate__animated animate__fadeIn">
+    <div class="profile-layout-container">
+        
+        <div class="profile-card-wrapper">
+            {% include 'estudiante_card.html' %}
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Reutiliza los mismos estilos que dejamos para expandir el contenedor en el detalle */
+    .ucatolica-layout-wrapper { width: 100%; padding: 40px 20px; display: flex; justify-content: center; }
+    .profile-layout-container { background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 40px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+    .profile-card-wrapper { width: 100%; }
+    .profile-card-wrapper .student-card-container { max-width: 100% !important; width: 100% !important; }
+</style>
+{% endblock %}

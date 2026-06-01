@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
 from starlette.responses import RedirectResponse
 
-from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_programa, find_one_estudiante_codigo, update_one_student, delete_student, reactivate_estudiante
+from operations.Estudiante_operations import createEstudiante, get_active_students,get_inactive_students, find_one_estudiante, find_one_estudiante_codigo, update_one_student, delete_student, reactivate_estudiante
 from operations.Implemento_operations import createImplemento, get_active_implements, get_inactive_implements, find_one_implement, find_one_implement_category, update_one_implement, delete_implement, reactivate_implement
 from operations.turno_Operations import createTurno, get_active_turnos, get_inactive_turnos, find_one_turno, find_one_turno_horario, update_one_turno, delete_turno, reactivate_turno
 from models import EstudianteBase, EstudianteId, EstudianteUpdate, ImplementoBase, ImplementoId,ImplementoUpdate, TurnoBase, TurnoId, TurnoUpdate
@@ -9,7 +9,7 @@ from sqlmodel import Session
 from db import SessionDep, create_all_tables, get_session
 from utils import save_img_local, save_img_remote
 from typing import Optional
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 app = FastAPI(lifespan=create_all_tables)
@@ -62,49 +62,70 @@ async def create_estudiante(
     if not new_estudiante:
         raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
 
-    return RedirectResponse(new_estudiante)
+    return RedirectResponse(f"/estudiante/{new_estudiante.id}", status_code=303)
 
 
-@app.get("/estudiantes", response_model=list[EstudianteId], tags=["Estudiantes"])
-async def read_estudiantes(session: SessionDep):
+@app.get("/estudiantes", response_class=HTMLResponse, tags=["Estudiantes"])
+async def read_estudiantes(request: Request, session: SessionDep):
     lista_estudiantes = get_active_students(session)
     if not lista_estudiantes:
         raise HTTPException(status_code=409, detail=f"No se encontraron estudiantes registrados")
-    return lista_estudiantes
+    return templates.TemplateResponse(request, "estudiantes_activos.html", {"lista_estudiantes": lista_estudiantes}
+    )
 
-@app.get("/estudiantesInactivos", response_model=list[EstudianteId], tags=["Estudiantes"])
-async def show_estudiantesInactivos(session: SessionDep):
+@app.get("/estudiantesInactivos", response_class=HTMLResponse, tags=["Estudiantes"])
+async def show_estudiantesInactivos(request: Request, session: SessionDep):
     estudiante_inactivos = get_inactive_students(session)
     if not estudiante_inactivos:
         raise HTTPException(status_code=404, detail="No estudiantes inactivos")
-    return estudiante_inactivos
+    return templates.TemplateResponse(request, "estudiantes_inactivos.html", {"estudiante_inactivos": estudiante_inactivos}
+    )
 
-@app.get("/estudiante/buscar", response_model=EstudianteId, tags=["Estudiantes"])
-async def show_estudiantes_programa(programa: str, session: SessionDep):
-    estudiante = find_one_estudiante_programa(programa, session)
-    if not estudiante:
-        raise HTTPException(status_code=404, detail=f"No se encontro estudiante del programa: {programa}")
-    return estudiante
 
-@app.get("/estudiante/buscar/codigo", response_model=EstudianteId, tags=["Estudiantes"])
-async def show_one_estudiante_codigo(codigo: int, session: SessionDep):
+
+@app.get("/estudiante/buscar/codigo", tags=["Estudiantes"])
+async def show_one_estudiante_codigo(
+        codigo: int,
+        request: Request,
+        session: SessionDep
+):
     estudiante = find_one_estudiante_codigo(codigo, session)
+
     if not estudiante:
         raise HTTPException(
             status_code=404,
-            detail=f"No se encontro estudiante con el codigo: {codigo}"
+            detail=f"No se encontró estudiante con el código: {codigo}"
         )
-    return estudiante
 
-@app.get("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
-async def show_one_estudiante(id: int, session: SessionDep):
+    # Renderizamos la plantilla de detalle pasándole el estudiante encontrado
+    return templates.TemplateResponse(request, "estudiante_codigo.html", {"estudiante": estudiante}
+    )
+
+
+@app.get("/estudiante/{id}", response_class=HTMLResponse, tags=["Estudiantes"])
+async def show_one_student_view(id: int, request: Request, session: SessionDep):
+    # Reutilizamos tu lógica de consulta existente
     estudiante = find_one_estudiante(id, session)
+
     if not estudiante:
-        raise HTTPException(status_code=404,detail=f"No se encontro estudiante con id: {id}")
-    return estudiante
+        raise HTTPException(status_code=404, detail=f"No se encontró estudiante con id: {id}")
+
+    # Renderizamos la nueva vista de detalle pasándole el objeto estudiante
+    return templates.TemplateResponse(request, "detalle_estudiante.html", {"estudiante": estudiante}
+    )
 
 
-@app.patch("/estudiante/{id}", response_model=EstudianteId, response_model_exclude={"id", "activo"},
+@app.get("/estudiante/editar/{id}", response_class=HTMLResponse, tags=["Vistas HTML"])
+async def mostrar_formulario_editar(id: int, request: Request, session: SessionDep):
+    estudiante_db = session.get(EstudianteId, id)
+    if not estudiante_db:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    return templates.TemplateResponse(request, "editar_estudiante.html", {"estudiante": estudiante_db})
+
+
+# 2. TU ENDPOINT PATCH CONFIGURADO PARA ENVIAR JSON AL FRONTEND
+@app.patch("/estudiante/editar/{id}", response_model=EstudianteId, response_model_exclude={"id", "activo"},
            tags=["Estudiantes"])
 async def update_estudiante(
         id: int,
@@ -120,19 +141,21 @@ async def update_estudiante(
     url_supabase = None
     if file and file.filename:
         try:
-            url_supabase = save_img_remote(file)
+            url_supabase = await save_img_remote(file)  # Añadido el await que faltaba
         except Exception as e:
             raise HTTPException(
                 status_code=500,
                 detail=f"Error al subir la nueva imagen a Supabase: {str(e)}"
             )
+
     estudiante_update = EstudianteUpdate(
         nombre=nombre,
         programa=programa
     )
+
     updated_student = update_one_student(id, estudiante_update, session, imagen_url=url_supabase)
 
-    return updated_student
+    return JSONResponse(status_code=200, content={"message": "Estudiante actualizado correctamente"})
 
 @app.delete("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
 async def delete_estudiante(id: int, session: SessionDep):
@@ -318,57 +341,7 @@ async def rehabilitar_turno(id: int, session: SessionDep):
         )
     return turno
 
-@app.post("/estudiante", response_model=EstudianteId, tags=["Estudiantes"])
-async def create_estudiante(
-        codigo: int = Form(...),
-        nombre: str = Form(...),
-        programa: str = Form(...),
-        file: Optional[UploadFile] = File(None),
-        session: SessionDep = None
-):
-    url_supabase = None
-    if file:
-        url_supabase = save_img_remote(file)
 
-    estudiante_base = EstudianteBase(codigo=codigo, nombre=nombre, programa=programa)
 
-    new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
 
-    if not new_estudiante:
-        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
 
-    return new_estudiante
-
-@app.get("/", response_class=HTMLResponse)
-async def templating(request: Request):
-    return templates.TemplateResponse(
-        request, "index.html"
-    )
-
-@app.get("/estudiante/nuevo", response_class=HTMLResponse, tags=["Vistas HTML"])
-async def mostrar_formulario_estudiante(request: Request):
-    return templates.TemplateResponse(
-        request,
-        name="crear_estudiante.html"
-    )
-
-@app.post("/estudiante/nuevo", response_class=HTMLResponse, tags=["Estudiantes"])
-async def create_estudiante(
-        codigo: int = Form(...),
-        nombre: str = Form(...),
-        programa: str = Form(...),
-        file: Optional[UploadFile] = File(None),
-        session: SessionDep = None
-):
-    url_supabase = None
-    if file:
-        url_supabase = save_img_remote(file)
-
-    estudiante_base = EstudianteBase(codigo=codigo, nombre=nombre, programa=programa)
-
-    new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
-
-    if not new_estudiante:
-        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
-
-    return new_estudiante
