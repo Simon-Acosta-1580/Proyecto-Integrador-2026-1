@@ -210,19 +210,14 @@ async def read_implementos(request: Request, session: SessionDep):
         raise HTTPException(status_code=409, detail=f"No se encontraron implementos registrados")
     return templates.TemplateResponse(request, "implementos_activos.html", {"lista_implementos": lista_implementos})
 
-@app.get("/implementosInactivos", response_model=list[ImplementoId], tags=["Implementos"])
-async def show_implementosInactivos(session: SessionDep):
+@app.get("/implementosInactivos", response_class=HTMLResponse, tags=["Implementos"])
+async def show_implementosInactivos(request: Request, session: SessionDep):
     implementos_inactivos = get_inactive_implements(session)
     if not implementos_inactivos:
         raise HTTPException(status_code=404, detail="No implementos inactivos")
-    return implementos_inactivos
+    return templates.TemplateResponse(request, "implementos_inactivos.html", {"implementos_inactivos": implementos_inactivos}
+    )
 
-@app.get("/implemento/buscar", response_model=ImplementoId, tags=["Implementos"])
-async def show_implementos_categoria(categoria: str, session: SessionDep):
-    implemento = find_one_implement_category(categoria, session)
-    if not implemento:
-        raise HTTPException(status_code=404, detail=f"No se encontro implemento del categoria: {categoria}")
-    return implemento
 
 @app.get("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
 async def show_one_implement(id: int, session: SessionDep):
