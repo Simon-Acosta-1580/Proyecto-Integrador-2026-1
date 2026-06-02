@@ -1,0 +1,11 @@
+{% extends 'implemento_base.html' %}
+{% block subcontent %}
+
+<div class="students-grid">
+    {% for implemento in lista_implementos %}
+        {% include 'implemento_card.html' %}
+
+    {% endfor %}
+</div>
+
+{% endblock %}
