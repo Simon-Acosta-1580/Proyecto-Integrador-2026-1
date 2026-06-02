@@ -203,12 +203,12 @@ async def create_implemento(
 
     return RedirectResponse(f"/implemento/{new_implemento.id}", status_code=303)
 
-@app.get("/implementos", response_model=list[ImplementoId], tags=["Implementos"])
-async def read_implements(session: SessionDep):
+@app.get("/implementos", response_class=HTMLResponse, tags=["Implementos"])
+async def read_implementos(request: Request, session: SessionDep):
     lista_implementos = get_active_implements(session)
     if not lista_implementos:
-        raise HTTPException(status_code=404, detail=f"No se encontraron implementos registrados")
-    return lista_implementos
+        raise HTTPException(status_code=409, detail=f"No se encontraron implementos registrados")
+    return templates.TemplateResponse(request, "implementos_activos.html", {"lista_implementos": lista_implementos})
 
 @app.get("/implementosInactivos", response_model=list[ImplementoId], tags=["Implementos"])
 async def show_implementosInactivos(session: SessionDep):
