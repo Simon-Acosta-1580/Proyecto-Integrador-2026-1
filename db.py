@@ -7,7 +7,7 @@ from typing import Annotated
 load_dotenv()
 neon_db = os.getenv("DATABASE_URL")
 
-engine = create_engine(neon_db)
+engine = create_engine(neon_db, pool_pre_ping=True, pool_recycle=300)
 
 def create_all_tables(app: FastAPI):
     if os.getenv("ENV") == "dev":
