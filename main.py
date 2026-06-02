@@ -219,12 +219,15 @@ async def show_implementosInactivos(request: Request, session: SessionDep):
     )
 
 
-@app.get("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
-async def show_one_implement(id: int, session: SessionDep):
+@app.get("/implemento/{id}", response_class=HTMLResponse, tags=["Implementos"])
+async def show_one_implement_view(id: int, request: Request, session: SessionDep):
     implemento = find_one_implement(id, session)
+
     if not implemento:
-        raise HTTPException(status_code=404,detail=f"No se encontro implemento con id: {id}")
-    return implemento
+        raise HTTPException(status_code=404, detail=f"No se encontró implemento con id: {id}")
+
+    return templates.TemplateResponse(request, "detalle_implemento.html", {"implemento": implemento}
+    )
 
 @app.patch("/implemento/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"},
            tags=["Implementos"])
