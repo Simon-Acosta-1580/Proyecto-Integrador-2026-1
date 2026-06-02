@@ -1,0 +1,332 @@
+{% extends 'implemento_base.html' %}
+{% block subcontent %}
+
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 para íconos elegantes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ucatolica-blue: #004b87;
+            --ucatolica-blue-dark: #003865;
+            --ucatolica-gold: #f9b233;
+            --ucatolica-light: #f4f6f9;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--ucatolica-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 75, 135, 0.08);
+            border: 1px solid rgba(0, 75, 135, 0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        /* Banner superior con los colores institucionales */
+        .brand-header {
+            background-color: var(--ucatolica-blue);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--ucatolica-gold);
+            position: relative;
+        }
+
+        .brand-header h2 {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            margin: 8px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .form-body {
+            padding: 40px;
+        }
+
+        .form-label-custom {
+            font-weight: 700;
+            color: var(--ucatolica-blue);
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group-custom {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background-color: #ffffff;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--ucatolica-blue);
+            box-shadow: 0 0 0 4px rgba(0, 75, 135, 0.15);
+        }
+
+        .input-icon {
+            background-color: #f8fafc;
+            color: #64748b;
+            border: none;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 2px solid #e2e8f0;
+        }
+
+        .form-control-custom {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-control-custom::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Área de carga de imagen */
+        .avatar-upload-container {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .avatar-upload-container:hover {
+            border-color: var(--ucatolica-gold);
+            background-color: rgba(249, 178, 51, 0.03);
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            color: var(--ucatolica-blue);
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-upload-container:hover .upload-icon {
+            transform: translateY(-3px);
+            color: var(--ucatolica-gold);
+        }
+
+        #avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin: 10px auto 0 auto;
+        }
+
+        /* Botón de envío con efecto institucional */
+        .btn-submit {
+            background-color: var(--ucatolica-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 75, 135, 0.2);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--ucatolica-blue-dark);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 75, 135, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .academic-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--ucatolica-gold);
+            color: var(--ucatolica-blue-dark);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="form-card">
+        <div class="brand-header">
+            <span class="academic-badge">Bienestar</span>
+            <h2><i class="fa-solid fa-user-graduate me-2"></i>Nuevo Implemento</h2>
+            <p>Universidad Católica de Colombia</p>
+        </div>
+
+        <div class="form-body">
+            <form action="/implemento/nuevo" method="POST" enctype="multipart/form-data" id="studentForm" onsubmit="disableSubmitButton()">
+
+                <div class="mb-4">
+                    <label for="codigo" class="form-label-custom">Código Identificacion</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-id-card"></i></span>
+                        <input
+                            type="number"
+                            id="codigo"
+                            name="codigo"
+                            class="form-control form-control-custom"
+                            placeholder="Ej: 123"
+                            required
+                            min="1"
+                        >
+                    </div>
+                    <div class="form-text mt-2 text-muted" style="font-size: 12px;">
+                        Debe ingresar un valor numérico entero mayor a cero.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="nombre" class="form-label-custom">Nombre</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                        <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            class="form-control form-control-custom"
+                            placeholder="Ej: Balon futbol"
+                            required
+                            maxlength="50"
+                        >
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="categoria" class="form-label-custom">Categoria</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                        <select id="categoria" name="categoria" class="form-select form-control-custom" required style="cursor: pointer;">
+                            <option value="" disabled selected>Selecciona tu implemento...</option>
+                            <option value="balon">Balon</option>
+                            <option value="instrumento">Instrumento</option>
+                            <option value="juego">Juego</option>
+                            <option value="cancha">Cancha</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label-custom">Foto de Identificación</label>
+                    <div class="avatar-upload-container" onclick="document.getElementById('file').click()">
+                        <div id="dropzone-text">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <h6 class="mb-1 fw-bold" style="font-size: 14px;">Arrastra tu foto o haz clic aquí</h6>
+                            <p class="text-muted mb-0" style="font-size: 11px;">(Soporta archivos: PNG, JPG, JPEG)</p>
+                        </div>
+                        <!-- Vista previa de imagen dinámica -->
+                        <img id="avatar-preview" alt="Previsualización de Foto">
+                    </div>
+
+                    <!-- Input nativo oculto pero enlazado para Swagger/FastAPI -->
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        class="d-none"
+                        accept="image/*"
+                        onchange="handleImagePreview(event)"
+                    >
+                </div>
+
+                <!-- Botón de Envío -->
+                <div class="mt-4 pt-2">
+                    <button type="submit" class="btn btn-submit shadow-sm">
+                        <i class="fa-solid fa-user-plus me-2"></i>Registrar Implemento
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Función nativa para previsualizar la foto antes de mandarla al Backend
+    function handleImagePreview(event) {
+        const input = event.target;
+        const preview = document.getElementById('avatar-preview');
+        const textZone = document.getElementById('dropzone-text');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                textZone.style.display = 'none';
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+            textZone.style.display = 'block';
+        }
+    }
+    function disableSubmitButton() {
+    const button = document.querySelector('.btn-submit');
+    // Cambiamos el texto para que el usuario sepa que está cargando
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Registrando...';
+    // Deshabilitamos el botón para evitar el doble clic
+    button.disabled = true;
+}
+</script>
+
+</body>
+</html>
+{% endblock %}

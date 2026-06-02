@@ -175,26 +175,33 @@ def rehabilitar_estudiante(id: int, session: SessionDep):
 
     return estudiante
 
-@app.post("/implemento", response_model=ImplementoId, tags=["Implementos"])
+@app.get("/implemento/nuevo", response_class=HTMLResponse, tags=["Implementos"])
+async def mostrar_formulario_implemento(request: Request):
+    return templates.TemplateResponse(
+        request,
+        name="crear_implemento.html"
+    )
+
+@app.post("/implemento/nuevo", response_class=HTMLResponse, tags=["Implementos"])
 async def create_implemento(
         codigo: int = Form(...),
         nombre: str = Form(...),
         categoria: str = Form(...),
         file: Optional[UploadFile] = File(None),
-        session: SessionDep = None
+        session: Session = Depends(get_session)
 ):
     url_supabase = None
     if file:
-        url_supabase = save_img_remote(file)
+        url_supabase = await save_img_remote(file)
 
     implemento_base = ImplementoBase(codigo=codigo, nombre=nombre, categoria=categoria)
 
-    new_implement = createImplemento(implemento_base, session, imagen_url=url_supabase)
+    new_implemento = createImplemento(implemento_base, session, imagen_url=url_supabase)
 
-    if not new_implement:
+    if not new_implemento:
         raise HTTPException(status_code=409, detail=f"El implemento con código {codigo} ya existe.")
 
-    return new_implement
+    return RedirectResponse(f"/implemento/{new_implemento.id}", status_code=303)
 
 @app.get("/implementos", response_model=list[ImplementoId], tags=["Implementos"])
 async def read_implements(session: SessionDep):
