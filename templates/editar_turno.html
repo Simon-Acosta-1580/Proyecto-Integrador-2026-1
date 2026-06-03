@@ -1,0 +1,248 @@
+{% extends 'turno_base.html' %}
+{% block subcontent %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --ucatolica-blue: #004b87;
+        --ucatolica-blue-dark: #003865;
+        --ucatolica-gold: #f9b233;
+        --ucatolica-light: #f4f6f9;
+        --text-dark: #1e293b;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 75, 135, 0.08);
+        border: 1px solid rgba(0, 75, 135, 0.1);
+        max-width: 600px;
+        width: 100%;
+        overflow: hidden;
+        margin: 20px auto;
+    }
+
+    .brand-header {
+        background-color: var(--ucatolica-blue);
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 5px solid var(--ucatolica-gold);
+        position: relative;
+    }
+
+    .brand-header h2 {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 24px;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    .brand-header p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        margin: 8px 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+
+    .form-body {
+        padding: 40px;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        color: var(--ucatolica-blue);
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-group-custom {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .input-group-custom:focus-within {
+        border-color: var(--ucatolica-blue);
+        box-shadow: 0 0 0 4px rgba(0, 75, 135, 0.15);
+    }
+
+    .input-icon {
+        background-color: #f8fafc;
+        color: #64748b;
+        border: none;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 2px solid #e2e8f0;
+        min-width: 55px;
+    }
+
+    .form-control-custom {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 12px 16px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    /* Estilo deshabilitado para el código del turno (Lectura) */
+    .form-control-custom:disabled {
+        background-color: #f8fafc;
+        color: #64748b;
+        cursor: not-allowed;
+    }
+
+    .btn-submit {
+        background-color: var(--ucatolica-blue);
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(0, 75, 135, 0.2);
+    }
+
+    .btn-submit:hover {
+        background-color: var(--ucatolica-blue-dark);
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 75, 135, 0.3);
+    }
+
+    .academic-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--ucatolica-gold);
+        color: var(--ucatolica-blue-dark);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="container d-flex justify-content-center">
+    <div class="form-card">
+        <div class="brand-header">
+            <span class="academic-badge">Edición</span>
+            <h2><i class="fa-solid fa-pen-to-square me-2"></i>Modificar Turno Actual</h2>
+            <p>Universidad Católica de Colombia</p>
+        </div>
+
+        <div class="form-body">
+            <form id="editTurnoForm" onsubmit="enviarModificacion(event)">
+
+                <div class="mb-4">
+                    <label class="form-label-custom">Código de Turno (Lectura)</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-ticket"></i></span>
+                        <input
+                            type="number"
+                            class="form-control form-control-custom"
+                            value="{{ turno.codigo }}"
+                            disabled
+                        >
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="estudiante_id" class="form-label-custom">Cambiar Estudiante Solicitante</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                        <select id="estudiante_id" name="estudiante_id" class="form-select form-control-custom" required>
+                            {% for estudiante in estudiantes %}
+                                <option value="{{ estudiante.id }}" {% if estudiante.id == turno.estudiante_id %} selected {% endif %}>
+                                    {{ estudiante.nombre }} (Código: {{ estudiante.codigo }}) 
+                                    {% if estudiante.id != turno.estudiante_id and not estudiante.activo %} [OCUPADO] {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="implemento_id" class="form-label-custom">Cambiar Implemento Asignado</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-futbol"></i></span>
+                        <select id="implemento_id" name="implemento_id" class="form-select form-control-custom" required>
+                            {% for implemento in implementos %}
+                                <option value="{{ implemento.id }}" {% if implemento.id == turno.implemento_id %} selected {% endif %}>
+                                    {{ implemento.nombre | upper }} 
+                                    {% if implemento.id != turno.implemento_id and not implemento.activo %} [EN PRÉSTAMO] {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <button type="submit" class="btn btn-submit shadow-sm" id="submitBtn">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Cambios del Turno
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    async function enviarModificacion(event) {
+        event.preventDefault(); // Previene que la página intente hacer una recarga POST tradicional
+        
+        const button = document.getElementById('submitBtn');
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Actualizando Préstamo...';
+        button.disabled = true;
+
+        // Construimos el FormData con los campos del formulario
+        const formData = new FormData(document.getElementById('editTurnoForm'));
+
+        try {
+            // Hacemos el llamado asíncrono usando la ID del turno inyectada por Jinja
+            const response = await fetch('/turno/editar/{{ turno.id }}', {
+                method: 'PATCH',
+                body: formData // Enviamos como Form Data tal cual lo lee FastAPI
+            });
+
+            if (response.ok) {
+                alert("Turno modificado correctamente en el sistema.");
+                // Redirección al detalle específico del turno actualizado
+                window.location.href = "/turno/{{ turno.id }}";
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.detail || 'No se pudo actualizar el registro institucional.'}`);
+                // Restauramos el botón si ocurre un error controlado
+                button.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Guardar Cambios del Turno';
+                button.disabled = false;
+            }
+        } catch (error) {
+            console.error("Error en el bloque Fetch PATCH:", error);
+            alert("Surgió un inconveniente de conexión con el servidor de la universidad.");
+            button.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Guardar Cambios del Turno';
+            button.disabled = false;
+        }
+    }
+</script>
+
+{% endblock %}
