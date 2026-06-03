@@ -42,7 +42,7 @@ class ImplementoUpdate(ImplementoBase):
 class TurnoBase(SQLModel):
     estudiante_id: int = Field(foreign_key="estudianteid.id")
     implemento_id: int = Field(foreign_key="implementoid.id")
-    codigo: int = Field(..., gt=0)
+    codigo: int = Field(default=None, gt=0)
     activo: bool = True
 
 class TurnoId(TurnoBase, table=True):
