@@ -229,9 +229,18 @@ async def show_one_implement_view(id: int, request: Request, session: SessionDep
     return templates.TemplateResponse(request, "detalle_implemento.html", {"implemento": implemento}
     )
 
-@app.patch("/implemento/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"},
+@app.get("/implemento/editar/{id}", response_class=HTMLResponse, tags=["Vistas HTML"])
+async def mostrar_formulario_editar(id: int, request: Request, session: SessionDep):
+    implemento_db = session.get(ImplementoId, id)
+    if not implemento_db:
+        raise HTTPException(status_code=404, detail="Implemento no encontrado")
+
+    return templates.TemplateResponse(request, "editar_implemento.html", {"implemento": implemento_db})
+
+
+@app.patch("/implemento/editar/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"},
            tags=["Implementos"])
-async def update_implemento(
+async def update_implement(
         id: int,
         nombre: Optional[str] = Form(None),
         categoria: Optional[str] = Form(None),
@@ -245,19 +254,21 @@ async def update_implemento(
     url_supabase = None
     if file and file.filename:
         try:
-            url_supabase = save_img_remote(file)
+            url_supabase = await save_img_remote(file)
         except Exception as e:
             raise HTTPException(
                 status_code=500,
                 detail=f"Error al subir la nueva imagen a Supabase: {str(e)}"
             )
-    implemento_update = EstudianteUpdate(
+
+    implemento_update = ImplementoUpdate(
         nombre=nombre,
         categoria=categoria
     )
+
     updated_implement = update_one_implement(id, implemento_update, session, imagen_url=url_supabase)
 
-    return updated_implement
+    return JSONResponse(status_code=200, content={"message": "Implemento actualizado correctamente"})
 
 @app.delete("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
 async def delete_implemento(id: int, session: SessionDep):

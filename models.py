@@ -24,9 +24,9 @@ class EstudianteUpdate(EstudianteBase):
     imagen: str | None = Field(default=None)
 
 class ImplementoBase(SQLModel):
-    nombre: str = Field(..., min_length=1, max_length=50)
-    codigo: int = Field(..., gt=0)
-    categoria: Categoria = Field(..., min_length=1, max_length=50)
+    nombre: str = Field(default=None, min_length=1, max_length=50)
+    codigo: int = Field(default=None, gt=0)
+    categoria: Categoria = Field(default=None, min_length=1, max_length=50)
     imagen: str | None = Field(default=None)
 
 
@@ -36,7 +36,7 @@ class ImplementoId(ImplementoBase, table=True):
 
 class ImplementoUpdate(ImplementoBase):
     nombre: str = Field(default=None, min_length=1, max_length=50)
-    categoria: Categoria = Field(..., min_length=1, max_length=50)
+    categoria: Categoria = Field(default=None, min_length=1, max_length=50)
     imagen: str | None = Field(default=None)
 
 class TurnoBase(SQLModel):

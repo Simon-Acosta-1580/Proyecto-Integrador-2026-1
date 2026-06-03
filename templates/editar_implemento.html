@@ -1,0 +1,311 @@
+{% extends 'estudiante_base.html' %}
+
+{% block subcontent %}
+<div class="ucatolica-form-wrapper">
+    <div class="ucatolica-card">
+
+        <div class="ucatolica-card-header">
+            <div class="ucatolica-header-left">
+                <i class="fa-solid fa-user-pen ucatolica-header-icon"></i>
+                <div>
+                    <h2 class="ucatolica-header-title">Editar Implemento</h2>
+                    <p class="ucatolica-header-subtitle">UNIVERSIDAD CATÓLICA DE COLOMBIA</p>
+                </div>
+            </div>
+            <span class="ucatolica-badge">BIENESTAR</span>
+        </div>
+
+        <div class="ucatolica-card-body">
+            <p class="ucatolica-alert-text">
+                Modificando el registro del código: <strong>{{ implemento.codigo }}</strong>
+            </p>
+
+            <form id="editStudentForm" enctype="multipart/form-data">
+
+                <div class="ucatolica-form-group">
+                    <label for="nombre" class="ucatolica-label">NOMBRE</label>
+                    <div class="ucatolica-input-box">
+                        <span class="ucatolica-input-icon-wrapper">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input
+                            type="text"
+                            class="ucatolica-field"
+                            id="nombre"
+                            name="nombre"
+                            value="{{ implemento.nombre }}"
+                            required
+                            maxlength="50"
+                            placeholder="Ej: balon futbol"
+                        >
+                    </div>
+                </div>
+
+                <div class="ucatolica-form-group">
+                    <label for="categoria" class="ucatolica-label">CATEGORÍA</label>
+                    <div class="ucatolica-input-box">
+                        <span class="ucatolica-input-icon-wrapper">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </span>
+                        {% set cate_actual = implemento.categoria.value if implemento.categoria.value else implemento.categoria %}
+                        <select
+                            class="ucatolica-field ucatolica-select"
+                            id="categoria"
+                            name="categoria"
+                            required
+                        >
+                            <option value="balon" {% if cate_actual == 'balon' %}selected{% endif %}>BALÓN</option>
+                            <option value="instrumento" {% if cate_actual == 'instrumento' %}selected{% endif %}>INSTRUMENTO</option>
+                            <option value="juego" {% if cate_actual == 'juego' %}selected{% endif %}>JUEGO</option>
+                            <option value="cancha" {% if cate_actual == 'cancha' %}selected{% endif %}>CANCHA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ucatolica-form-group">
+                    <label for="file" class="ucatolica-label">ACTUALIZAR FOTO (OPCIONAL)</label>
+                    <input
+                        type="file"
+                        class="ucatolica-file-control"
+                        id="file"
+                        name="file"
+                        accept="image/*"
+                    >
+                    <div class="ucatolica-help-text">
+                        Deja este campo vacío si deseas conservar la foto actual que ya se encuentra almacenada en tu bucket de Supabase.
+                    </div>
+                </div>
+
+                <div class="ucatolica-form-footer">
+                    <a href="/implemento/{{ implemento.id }}" class="ucatolica-btn-cancel">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="ucatolica-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ucatolica-form-wrapper {
+        max-width: 650px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    }
+
+    .ucatolica-card {
+        background: #ffffff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 30px rgba(0, 75, 135, 0.08) !important;
+        border: 1px solid #e2e8f0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Encabezado Azul e Hilo Dorado */
+    .ucatolica-card-header {
+        background-color: #004b87 !important;
+        padding: 24px 30px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        border-bottom: 4px solid #f2a900 !important;
+    }
+
+    .ucatolica-header-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 15px !important;
+    }
+
+    .ucatolica-header-icon {
+        font-size: 24px !important;
+        color: #ffffff !important;
+    }
+
+    .ucatolica-header-title {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        margin: 0 !important;
+    }
+
+    .ucatolica-header-subtitle {
+        font-size: 11px !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin: 2px 0 0 0 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .ucatolica-badge {
+        background-color: #f2a900 !important;
+        color: #004b87 !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        padding: 5px 12px !important;
+        border-radius: 20px !important;
+    }
+
+    .ucatolica-card-body {
+        padding: 30px !important;
+        background-color: #ffffff !important;
+    }
+
+    .ucatolica-alert-text {
+        font-size: 14px !important;
+        color: #64748b !important;
+        margin-bottom: 25px !important;
+    }
+
+    .ucatolica-form-group {
+        margin-bottom: 22px !important;
+    }
+
+    .ucatolica-label {
+        display: block !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        color: #004b87 !important;
+        margin-bottom: 8px !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    /* Caja contenedora del input con fondo gris */
+    .ucatolica-input-box {
+        display: flex !important;
+        align-items: center !important;
+        background-color: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    /* Recuadro del icono a la izquierda */
+    .ucatolica-input-icon-wrapper {
+        padding: 12px 15px !important;
+        color: #94a3b8 !important;
+        background-color: #f1f5f9 !important;
+        border-right: 1px solid #cbd5e1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 46px !important;
+    }
+
+    /* Cajas de entrada de datos limpias sin bordes propios */
+    .ucatolica-field {
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 12px 14px !important;
+        font-size: 14.5px !important;
+        color: #1e293b !important;
+        outline: none !important;
+    }
+
+    .ucatolica-select {
+        cursor: pointer !important;
+        appearance: none !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 15px center !important;
+        background-size: 12px !important;
+        padding-right: 40px !important;
+    }
+
+    .ucatolica-file-control {
+        width: 100% !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        background-color: #f8fafc !important;
+        padding: 10px !important;
+        font-size: 14px !important;
+    }
+
+    .ucatolica-help-text {
+        font-size: 12px !important;
+        color: #64748b !important;
+        margin-top: 6px !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Footer y Botones */
+    .ucatolica-form-footer {
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 12px !important;
+        margin-top: 35px !important;
+        padding-top: 20px !important;
+        border-top: 1px solid #e2e8f0 !important;
+    }
+
+    .ucatolica-btn-cancel {
+        padding: 10px 22px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        background-color: #f1f5f9 !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        transition: background 0.2s !important;
+    }
+
+    .ucatolica-btn-cancel:hover {
+        background-color: #e2e8f0 !important;
+        color: #334155 !important;
+    }
+
+    .ucatolica-btn-save {
+        padding: 10px 24px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        background-color: #004b87 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 75, 135, 0.15) !important;
+        transition: background 0.2s !important;
+    }
+
+    .ucatolica-btn-save:hover {
+        background-color: #003560 !important;
+    }
+</style>
+
+<script>
+    document.getElementById('editStudentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/implemento/editar/{{ implemento.id }}', {
+                method: 'PATCH',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert("¡Implemento actualizado con éxito!");
+                window.location.href = '/implemento/{{ implemento.id }}';
+            } else {
+                const errorData = await response.json();
+                alert(`Error al actualizar: ${errorData.detail || 'Verifique los datos introducidos.'}`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Hubo un problema de comunicación con el servidor.");
+        }
+    });
+</script>
+{% endblock %}
+
