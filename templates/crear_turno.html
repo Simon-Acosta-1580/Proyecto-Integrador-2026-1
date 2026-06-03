@@ -1,0 +1,229 @@
+{% extends 'turno_base.html' %}
+{% block subcontent %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --ucatolica-blue: #004b87;
+        --ucatolica-blue-dark: #003865;
+        --ucatolica-gold: #f9b233;
+        --ucatolica-light: #f4f6f9;
+        --text-dark: #1e293b;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 75, 135, 0.08);
+        border: 1px solid rgba(0, 75, 135, 0.1);
+        max-width: 600px;
+        width: 100%;
+        overflow: hidden;
+        margin: 20px auto;
+    }
+
+    /* Banner superior con los colores institucionales */
+    .brand-header {
+        background-color: var(--ucatolica-blue);
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 5px solid var(--ucatolica-gold);
+        position: relative;
+    }
+
+    .brand-header h2 {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 24px;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    .brand-header p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        margin: 8px 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+
+    .form-body {
+        padding: 40px;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        color: var(--ucatolica-blue);
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-group-custom {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .input-group-custom:focus-within {
+        border-color: var(--ucatolica-blue);
+        box-shadow: 0 0 0 4px rgba(0, 75, 135, 0.15);
+    }
+
+    .input-icon {
+        background-color: #f8fafc;
+        color: #64748b;
+        border: none;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 2px solid #e2e8f0;
+        min-width: 55px;
+    }
+
+    .form-control-custom {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 12px 16px;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .form-control-custom::placeholder {
+        color: #94a3b8;
+    }
+
+    /* Botón de envío con efecto institucional */
+    .btn-submit {
+        background-color: var(--ucatolica-blue);
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(0, 75, 135, 0.2);
+    }
+
+    .btn-submit:hover {
+        background-color: var(--ucatolica-blue-dark);
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 75, 135, 0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .academic-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--ucatolica-gold);
+        color: var(--ucatolica-blue-dark);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="container d-flex justify-content-center">
+    <div class="form-card">
+        <div class="brand-header">
+            <span class="academic-badge">Bienestar</span>
+            <h2><i class="fa-solid fa-clock-history me-2"></i>Asignar Nuevo Turno</h2>
+            <p>Universidad Católica de Colombia</p>
+        </div>
+
+        <div class="form-body">
+            <form action="/turno/nuevo" method="POST" id="turnoForm" onsubmit="disableSubmitButton()">
+
+                <div class="mb-4">
+                    <label for="codigo" class="form-label-custom">Código de Turno / Préstamo</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-ticket"></i></span>
+                        <input
+                            type="number"
+                            id="codigo"
+                            name="codigo"
+                            class="form-control form-control-custom"
+                            placeholder="Ej: 501"
+                            required
+                            min="1"
+                        >
+                    </div>
+                    <div class="form-text mt-2 text-muted" style="font-size: 12px;">
+                        Ingrese un identificador numérico único para esta transacción.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="estudiante_id" class="form-label-custom">Estudiante Solicitante</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                        <select id="estudiante_id" name="estudiante_id" class="form-select form-control-custom" required style="cursor: pointer;">
+                            <option value="" disabled selected>Seleccione el estudiante disponible...</option>
+                            {% for estudiante in estudiantes %}
+                                <option value="{{ estudiante.id }}">
+                                    {{ estudiante.nombre }} (Código: {{ estudiante.codigo }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="implemento_id" class="form-label-custom">Implemento Deportivo / Cultural</label>
+                    <div class="input-group input-group-custom">
+                        <span class="input-icon"><i class="fa-solid fa-futbol"></i></span>
+                        <select id="implemento_id" name="implemento_id" class="form-select form-control-custom" required style="cursor: pointer;">
+                            <option value="" disabled selected>Seleccione el recurso libre...</option>
+                            {% for implemento in implementos %}
+                                <option value="{{ implemento.id }}">
+                                    {{ implemento.nombre | upper }} — Categoria: {{ implemento.categoria | upper }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <button type="submit" class="btn btn-submit shadow-sm">
+                        <i class="fa-solid fa-calendar-plus me-2"></i>Registrar Préstamo de Turno
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function disableSubmitButton() {
+        const button = document.querySelector('.btn-submit');
+        // Cambiamos el texto para retroalimentar la carga
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Procesando Préstamo...';
+        // Deshabilitamos el botón para prevenir ejecuciones repetidas
+        button.disabled = true;
+    }
+</script>
+
+{% endblock %}
