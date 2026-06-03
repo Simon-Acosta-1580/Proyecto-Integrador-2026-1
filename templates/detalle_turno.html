@@ -17,7 +17,7 @@
             {% endif %}
         </div>
 
-        <div class="profile-card-wrapper">
+        <div class="profile-card-wrapper" id="detalleTurnoCardContainer">
             {% include 'turno_card.html' %}
         </div>
 
@@ -49,7 +49,7 @@
         border: 1px solid #e2e8f0 !important;
         padding: 40px !important;
         width: 100% !important;
-        max-width: 450px !important; /* Mismo ancho controlado */
+        max-width: 450px !important;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
         display: flex !important;
         flex-direction: column !important;
@@ -58,10 +58,10 @@
         box-sizing: border-box;
     }
 
-    /* Ajustes específicos para incrustar el turno_card.html de forma homogénea */
+    /* Ajustes específicos para incrustar el turno_card.html */
     .profile-card-wrapper {
         width: 100% !important;
-        margin-top: 35px !important; /* Espacio superior prudente para los botones dinámicos */
+        margin-top: 35px !important;
     }
 
     .profile-card-wrapper .turno-card-container {
@@ -71,9 +71,26 @@
     }
 
     .profile-card-wrapper .turno-card {
-        box-shadow: none !important; /* Remueve dobles sombras innecesarias */
+        box-shadow: none !important;
         border: 1px solid #f1f5f9 !important;
         border-top: 4px solid var(--ucatolica-blue, #004b87) !important;
+    }
+
+    /* 🔥 LA CLAVE: Estilos interactivos aplicados a los valores de la tarjeta
+       ÚNICAMENTE cuando están dentro del contenedor de esta vista de detalle.
+    */
+    .profile-card-wrapper .turno-value {
+        color: var(--ucatolica-blue, #004b87) !important;
+        cursor: pointer !important;
+        font-weight: 700 !important;
+        transition: all 0.2s ease-in-out;
+        display: inline-block;
+    }
+
+    .profile-card-wrapper .turno-value:hover {
+        color: #002644 !important;
+        text-decoration: underline !important;
+        transform: scale(1.02);
     }
 
     /* Ubicación exacta arriba a la derecha */
@@ -109,38 +126,44 @@
         text-decoration: none !important;
     }
 
-    /* Botón Finalizar Turno (Simula el Delete semántico del sistema) */
-    .btn-delete {
-        background-color: #fee2e2 !important;
-        color: #dc2626 !important;
-    }
-    .btn-delete:hover {
-        background-color: #dc2626 !important;
-        color: #ffffff !important;
-    }
+    .btn-delete { background-color: #fee2e2 !important; color: #dc2626 !important; }
+    .btn-delete:hover { background-color: #dc2626 !important; color: #ffffff !important; }
 
-    /* Botón Reactivar Turno */
-    .btn-reactivate {
-        background-color: #dcfce7 !important;
-        color: #16a34a !important;
-    }
-    .btn-reactivate:hover {
-        background-color: #16a34a !important;
-        color: #ffffff !important;
-    }
+    .btn-reactivate { background-color: #dcfce7 !important; color: #16a34a !important; }
+    .btn-reactivate:hover { background-color: #16a34a !important; color: #ffffff !important; }
 
-    /* Botón Editar Configuración */
-    .btn-edit {
-        background-color: #e0f2fe !important;
-        color: #0369a1 !important;
-    }
-    .btn-edit:hover {
-        background-color: #004b87 !important;
-        color: #ffffff !important;
-    }
+    .btn-edit { background-color: #e0f2fe !important; color: #0369a1 !important; }
+    .btn-edit:hover { background-color: #004b87 !important; color: #ffffff !important; }
 </style>
 
 <script>
+    // Ejecutar cuando el HTML esté completamente cargado en el navegador
+    document.addEventListener("DOMContentLoaded", () => {
+        // Obtenemos los contenedores de texto (.turno-value) dentro de la tarjeta de esta vista
+        const valoresTarjeta = document.querySelectorAll("#detalleTurnoCardContainer .turno-value");
+
+        // El primer .turno-value corresponde al Estudiante, el segundo al Implemento
+        if (valoresTarjeta.length >= 2) {
+            const estudianteSpan = valoresTarjeta[0];
+            const implementoSpan = valoresTarjeta[1];
+
+            // Sacamos las IDs dinámicamente usando las variables que Jinja inyecta en el backend
+            {% set est_id = turno.estudiante.id if turno.estudiante else turno.estudiante_id %}
+            {% set imp_id = turno.implemento.id if turno.implemento else turno.implemento_id %}
+
+            // Agregamos los redireccionamientos al hacer click
+            estudianteSpan.addEventListener("click", () => {
+                window.location.href = "/estudiante/{{ est_id }}";
+            });
+            estudianteSpan.setAttribute("title", "Click para ir al capturador del estudiante");
+
+            implementoSpan.addEventListener("click", () => {
+                window.location.href = "/implemento/{{ imp_id }}";
+            });
+            implementoSpan.setAttribute("title", "Click para ir al capturador del implemento");
+        }
+    });
+
     async function ejecutarAccionTurno(url, metodo) {
         const confirmacion = confirm(`¿Está seguro de realizar esta acción sobre el turno seleccionado?`);
         if (!confirmacion) return;
@@ -155,7 +178,6 @@
 
             if (response.ok) {
                 alert("El estado del turno ha sido actualizado.");
-                // Redireccionamos a la lista completa de turnos en el sistema
                 window.location.href = "/turnos";
             } else {
                 const errorData = await response.json();
