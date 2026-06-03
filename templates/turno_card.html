@@ -1,0 +1,156 @@
+<style>
+    /* Contenedor individual de la tarjeta de turno */
+    .turno-card-container {
+        max-width: 280px;
+        width: 100%;
+        margin: 0 auto; /* Centra la tarjeta dentro del grid */
+    }
+
+    .turno-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid var(--ucatolica-blue, #004b87); /* Acento institucional arriba */
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .turno-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 75, 135, 0.08);
+        border-color: rgba(0, 75, 135, 0.2);
+    }
+
+    .turno-card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex-grow: 1;
+    }
+
+    .turno-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 10px;
+        margin-bottom: 4px;
+    }
+
+    /* Enlace interactivo en el código del turno */
+    .turno-code-link {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--ucatolica-blue, #004b87);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        background-color: rgba(0, 75, 135, 0.05);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .turno-code-link:hover {
+        background-color: var(--ucatolica-blue, #004b87);
+        color: #ffffff;
+    }
+
+    .turno-info-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #475569;
+    }
+
+    .turno-info-row i {
+        color: var(--ucatolica-blue, #004b87);
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+    }
+
+    .turno-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #94a3b8;
+        font-weight: 700;
+        display: block;
+        margin-bottom: -2px;
+        letter-spacing: 0.5px;
+    }
+
+    .turno-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .badge-status {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-activo { background-color: #dcfce7; color: #15803d; }
+    .status-inactivo { background-color: #fee2e2; color: #b91c1c; }
+</style>
+
+<div class="turno-card-container">
+    <div class="turno-card">
+
+        <div class="turno-card-body">
+            <div class="turno-card-header">
+                <a href="/turno/{{ turno.id }}" class="turno-code-link" title="Ver detalles del turno">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>#{{ turno.codigo }}</span>
+                </a>
+
+                {% if turno.activo %}
+                    <span class="badge-status status-activo">En Curso</span>
+                {% else %}
+                    <span class="badge-status status-inactivo">Finalizado</span>
+                {% endif %}
+            </div>
+
+            <div class="turno-info-row">
+                <i class="fa-solid fa-user-graduate"></i>
+                <div>
+                    <span class="turno-label">Estudiante</span>
+                    <span class="turno-value">
+                        {% if turno.estudiante %}
+                            {{ turno.estudiante.nombre }}
+                        {% else %}
+                            ID Estudiante: {{ turno.estudiante_id }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="turno-info-row">
+                <i class="fa-solid fa-futbol"></i>
+                <div>
+                    <span class="turno-label">Implemento Asignado</span>
+                    <span class="turno-value">
+                        {% if turno.implemento %}
+                            {{ turno.implemento.nombre | upper }}
+                        {% else %}
+                            ID Recurso: {{ turno.implemento_id }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
