@@ -109,7 +109,6 @@ async def show_one_estudiante_codigo(
 
 @app.get("/estudiante/{id}", response_class=HTMLResponse, tags=["Estudiantes"])
 async def show_one_student_view(id: int, request: Request, session: SessionDep):
-    # Reutilizamos tu lógica de consulta existente
     estudiante = find_one_estudiante(id, session)
 
     if not estudiante:
