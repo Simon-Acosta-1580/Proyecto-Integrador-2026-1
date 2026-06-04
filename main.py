@@ -86,7 +86,7 @@ async def read_estudiantes(request: Request, session: SessionDep):
 async def show_estudiantesInactivos(request: Request, session: SessionDep):
     estudiante_inactivos = get_inactive_students(session)
     if not estudiante_inactivos:
-        raise HTTPException(status_code=404, detail="No estudiantes inactivos")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code": 404})
     return templates.TemplateResponse(request, "estudiantes_inactivos.html", {"estudiante_inactivos": estudiante_inactivos}
     )
 
@@ -101,12 +101,8 @@ async def show_one_estudiante_codigo(
     estudiante = find_one_estudiante_codigo(codigo, session)
 
     if not estudiante:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No se encontró estudiante con el código: {codigo}"
-        )
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
 
-    # Renderizamos la plantilla de detalle pasándole el estudiante encontrado
     return templates.TemplateResponse(request, "estudiante_codigo.html", {"estudiante": estudiante}
     )
 
@@ -117,9 +113,8 @@ async def show_one_student_view(id: int, request: Request, session: SessionDep):
     estudiante = find_one_estudiante(id, session)
 
     if not estudiante:
-        raise HTTPException(status_code=404, detail=f"No se encontró estudiante con id: {id}")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
 
-    # Renderizamos la nueva vista de detalle pasándole el objeto estudiante
     return templates.TemplateResponse(request, "detalle_estudiante.html", {"estudiante": estudiante}
     )
 
@@ -128,14 +123,14 @@ async def show_one_student_view(id: int, request: Request, session: SessionDep):
 async def mostrar_formulario_editar(id: int, request: Request, session: SessionDep):
     estudiante_db = session.get(EstudianteId, id)
     if not estudiante_db:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
 
     return templates.TemplateResponse(request, "editar_estudiante.html", {"estudiante": estudiante_db})
 
 
 @app.patch("/estudiante/editar/{id}", response_model=EstudianteId, response_model_exclude={"id", "activo"},
            tags=["Estudiantes"])
-async def update_estudiante(
+async def update_estudiante(request:Request,
         id: int,
         nombre: Optional[str] = Form(None),
         programa: Optional[str] = Form(None),
@@ -144,7 +139,7 @@ async def update_estudiante(
 ):
     estudiante_db = session.get(EstudianteId, id)
     if not estudiante_db:
-        raise HTTPException(status_code=404, detail=f"Estudiante con ID {id} no encontrado")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
 
     url_supabase = None
     if file and file.filename:
@@ -166,21 +161,20 @@ async def update_estudiante(
     return JSONResponse(status_code=200, content={"message": "Estudiante actualizado correctamente"})
 
 @app.delete("/estudiante/{id}", response_model=EstudianteId, tags=["Estudiantes"])
-async def delete_estudiante(id: int, session: SessionDep):
+async def delete_estudiante(request:Request, id: int, session: SessionDep):
     estudiante_eliminado = delete_student(id, session)
 
     if not estudiante_eliminado:
-        raise HTTPException(status_code=404, detail=f"Estudiante {id} no encontrado")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
 
     return estudiante_eliminado
 
 @app.patch("/estudiante/rehabilitar/{id}", response_model=EstudianteId, tags=["Estudiantes"])
-def rehabilitar_estudiante(id: int, session: SessionDep):
+def rehabilitar_estudiante(request:Request, id: int, session: SessionDep):
     estudiante = reactivate_estudiante(id, session)
 
     if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado, verifique que estudiante no forme parte de un turno activo")
-
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
     return estudiante
 
 @app.get("/implemento/nuevo", response_class=HTMLResponse, tags=["Implementos"])
@@ -191,7 +185,7 @@ async def mostrar_formulario_implemento(request: Request):
     )
 
 @app.post("/implemento/nuevo", response_class=HTMLResponse, tags=["Implementos"])
-async def create_implemento(
+async def create_implemento(request: Request,
         codigo: int = Form(...),
         nombre: str = Form(...),
         categoria: str = Form(...),
@@ -207,7 +201,7 @@ async def create_implemento(
     new_implemento = createImplemento(implemento_base, session, imagen_url=url_supabase)
 
     if not new_implemento:
-        raise HTTPException(status_code=409, detail=f"El implemento con código {codigo} ya existe.")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 409})
 
     return RedirectResponse(f"/implemento/{new_implemento.id}", status_code=303)
 
@@ -215,14 +209,14 @@ async def create_implemento(
 async def read_implementos(request: Request, session: SessionDep):
     lista_implementos = get_active_implements(session)
     if not lista_implementos:
-        raise HTTPException(status_code=409, detail=f"No se encontraron implementos registrados")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
     return templates.TemplateResponse(request, "implementos_activos.html", {"lista_implementos": lista_implementos})
 
 @app.get("/implementosInactivos", response_class=HTMLResponse, tags=["Implementos"])
 async def show_implementosInactivos(request: Request, session: SessionDep):
     implementos_inactivos = get_inactive_implements(session)
     if not implementos_inactivos:
-        raise HTTPException(status_code=404, detail="No implementos inactivos")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
     return templates.TemplateResponse(request, "implementos_inactivos.html", {"implementos_inactivos": implementos_inactivos}
     )
 

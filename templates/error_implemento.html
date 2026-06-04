@@ -1,0 +1,49 @@
+{% extends 'estudiante_base.html' %}
+
+{% block content %}
+<div class="container my-5 text-center animate__animated animate__fadeIn">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            
+            {% if status_code == 404 %}
+                <div class="display-1 fw-bold text-secondary mb-3">
+                    <i class="fa-solid fa-user-xmark text-danger"></i> 404
+                </div>
+                <h2 class="fw-bold text-dark mb-3">Implemento No Encontrado</h2>
+                <p class="text-muted lead mb-4">
+                    El identificador o código de implemento ingresado no coincide con ningún registro en el censo de Bienestar Universitario.
+                </p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="/implementosInactivos" class="btn btn-primary btn-lg px-4 gap-3">
+                        <i class="fa-solid fa-users me-2"></i>Ver Estudiantes Inactivos
+                    </a>
+                    <a href="/implementos" class="btn btn-primary btn-lg px-4 gap-3">
+                        <i class="fa-solid fa-users me-2"></i>Ver Estudiantes
+                    </a>
+                    <a href="/implemento/nuevo" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fa-solid fa-user-plus me-2"></i>Registrar Nuevo
+                    </a>
+                </div>
+
+            {% elif status_code == 409 %}
+                <div class="display-1 fw-bold text-secondary mb-3">
+                    <i class="fa-solid fa-triangle-exclamation text-warning"></i> 409
+                </div>
+                <h2 class="fw-bold text-dark mb-3">Conflicto en Registro de Implemento</h2>
+                <p class="text-muted lead mb-4">
+                    No se pudo procesar la solicitud. Verifique bien los datos: es muy probable que el código institucional o documento que intenta registrar ya pertenezca a otro implemento en el sistema.
+                </p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button onclick="window.history.back();" class="btn btn-warning btn-lg px-4 gap-3 text-dark fw-bold">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Corregir Datos
+                    </button>
+                    <a href="/" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fa-solid fa-house me-2"></i>Ir al Inicio
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
