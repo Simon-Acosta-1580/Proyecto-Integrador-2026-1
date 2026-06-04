@@ -1,0 +1,41 @@
+# ====================================================================
+# .gitignore - Sistema de Gestión de Turnos (Bienestar Universitario)
+# ====================================================================
+
+# --- Entornos Virtuales (Aislamiento de Dependencias) ---
+# Evita subir gigabytes de librerías locales a GitHub
+.venv/
+venv/
+ENV/
+env/
+育env/
+
+# --- Caché y Compilación de Python ---
+# Archivos internos que genera Python al ejecutar el backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# --- Configuraciones del Entorno y Credenciales Secretas ---
+# ¡CRÍTICO! Aquí se ocultan las URLs de conexión a Neon/Supabase
+.env
+.env.local
+.env.*
+instance/
+.secrets
+
+# --- Archivos de Configuración del Editor (IDE) ---
+# Evita compartir configuraciones locales de tu VS Code o PyCharm
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# --- Sistema Operativo (Basura del Sistema) ---
+.DS_Store
+Thumbs.db
