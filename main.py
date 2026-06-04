@@ -226,8 +226,7 @@ async def show_one_implement_view(id: int, request: Request, session: SessionDep
     implemento = find_one_implement(id, session)
 
     if not implemento:
-        raise HTTPException(status_code=404, detail=f"No se encontró implemento con id: {id}")
-
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
     return templates.TemplateResponse(request, "detalle_implemento.html", {"implemento": implemento}
     )
 
@@ -235,14 +234,13 @@ async def show_one_implement_view(id: int, request: Request, session: SessionDep
 async def mostrar_formulario_editar(id: int, request: Request, session: SessionDep):
     implemento_db = session.get(ImplementoId, id)
     if not implemento_db:
-        raise HTTPException(status_code=404, detail="Implemento no encontrado")
-
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
     return templates.TemplateResponse(request, "editar_implemento.html", {"implemento": implemento_db})
 
 
 @app.patch("/implemento/editar/{id}", response_model=ImplementoId, response_model_exclude={"id", "activo"},
            tags=["Implementos"])
-async def update_implement(
+async def update_implement(request: Request,
         id: int,
         nombre: Optional[str] = Form(None),
         categoria: Optional[str] = Form(None),
@@ -251,7 +249,7 @@ async def update_implement(
 ):
     implemento_db = session.get(ImplementoId, id)
     if not implemento_db:
-        raise HTTPException(status_code=404, detail=f"Implemento con ID {id} no encontrado")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
 
     url_supabase = None
     if file and file.filename:
@@ -273,20 +271,20 @@ async def update_implement(
     return JSONResponse(status_code=200, content={"message": "Implemento actualizado correctamente"})
 
 @app.delete("/implemento/{id}", response_model=ImplementoId, tags=["Implementos"])
-async def delete_implemento(id: int, session: SessionDep):
+async def delete_implemento(request:Request, id: int, session: SessionDep):
     implemento_eliminado = delete_implement(id, session)
 
     if not implemento_eliminado:
-        raise HTTPException(status_code=404, detail=f"Implemento {id} no encontrado")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
 
     return implemento_eliminado
 
 @app.patch("/implemento/rehabilitar/{id}", response_model=ImplementoId, tags=["Implementos"])
-def rehabilitar_implemento(id: int, session: SessionDep):
+def rehabilitar_implemento(request: Request, id: int, session: SessionDep):
     implemento = reactivate_implement(id, session)
 
     if not implemento:
-        raise HTTPException(status_code=404, detail="Implemento no encontrado, verifique que no forma parte de un turno activo")
+        return templates.TemplateResponse(request, "error_implemento.html", {"status_code": 404})
 
     return implemento
 
