@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentación - Sistema de Gestión de Turnos</title>
-    <!-- Bootstrap 5 CDN para maquetación limpia -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para íconos clave -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="bg-light py-5">
@@ -37,57 +35,110 @@
   </section>
 
   <section class="mb-4">
-      <h3 class="h4 fw-bold text-secondary"><i class="fa-solid fa-route me-2"></i>Mapa de Endpoints</h3>
-      <p class="text-muted small">Listado de rutas semánticas construidas en el backend:</p>
-        
-  <div class="table-responsive">
-      <table class="table table-bordered table-striped align-middle">
-          <thead class="table-dark">
-              <tr>
-                  <th style="width: 15%;">Método</th>
-                  <th style="width: 35%;">Ruta</th>
-                  <th style="width: 50%;">Acción de Negocio</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr>
-                  <td><span class="badge bg-success w-100">GET</span></td>
-                  <td><code>/</code></td>
-                  <td>Dashboard principal con el carrusel de accesos rápidos.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-success w-100">GET</span></td>
-                  <td><code>/turnos</code></td>
-                  <td>Panel de visualización de todos los turnos del sistema.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-success w-100">GET</span></td>
-                  <td><code>/turno/{id}</code></td>
-                  <td>Vista extendida y detalles de un turno específico.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-primary w-100">POST</span></td>
-                  <td><code>/turno/nuevo</code></td>
-                  <td>Procesa el formulario para registrar y abrir un nuevo préstamo.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
-                  <td><code>/turno/{id}</code></td>
-                  <td>Actualiza de forma parcial los datos de un turno existente.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-danger w-100">DELETE</span></td>
-                  <td><code>/turno/{id}</code></td>
-                  <td>Finaliza el turno de préstamo y libera el implemento de inmediato.</td>
-              </tr>
-              <tr>
-                  <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
-                  <td><code>/turno/rehabilitar/{id}</code></td>
-                  <td>Revierte la finalización de un préstamo para activarlo de nuevo.</td>
-              </tr>
-          </tbody>
-      </table>
-  </div>
+        <h3 class="h4 fw-bold text-secondary"><i class="fa-solid fa-route me-2"></i>Mapa de Endpoints</h3>
+        <p class="text-muted small">Listado completo de rutas semánticas construidas en el backend agrupadas por módulo:</p>
+      <div class="table-responsive">
+          <table class="table table-bordered table-striped align-middle">
+              <thead class="table-dark">
+                  <tr>
+                      <th style="width: 15%;">Método</th>
+                      <th style="width: 35%;">Ruta</th>
+                      <th style="width: 50%;">Acción de Negocio</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr class="table-secondary fw-bold"><td colspan="3"><i class="fa-solid fa-house me-2"></i>Módulo Principal</td></tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>  
+                      <td><code>/</code></td>  
+                      <td>Dashboard principal con el carrusel de accesos rápidos e interactivos.</td>
+                  </tr>
+                  <tr class="table-secondary fw-bold"><td colspan="3"><i class="fa-solid fa-receipt me-2"></i>Módulo de Gestión de Turnos (Préstamos)</td></tr>  
+                  <tr>      
+                      <td><span class="badge bg-success w-100">GET</span></td>  
+                      <td><code>/turnos</code></td>  
+                      <td>Panel de visualización de todos los turnos registrados (Activos / Finalizados).</td>
+                  </tr>
+                  <tr>      
+                      <td><span class="badge bg-success w-100">GET</span></td>  
+                      <td><code>/turno/{id}</code></td>  
+                      <td>Vista extendida de un turno con enlaces interactivos a los perfiles de recursos.</td>
+                  </tr>  
+                  <tr>      
+                      <td><span class="badge bg-success w-100">GET</span></td>  
+                      <td><code>/turno/nuevo</code></td>  
+                      <td>Renderiza el formulario HTML para la asignación de un nuevo préstamo.</td>
+                  </tr>  
+                  <tr>
+                      <td><span class="badge bg-primary w-100">POST</span></td>
+                      <td><code>/turno/nuevo</code></td>
+                      <td>Procesa y valida las reglas de negocio para abrir un nuevo turno en la BD Cloud.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/turno/editar/{id}</code></td>
+                      <td>Carga el formulario de modificación con los datos persistidos del turno.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
+                      <td><code>/turno/{id}</code></td>
+                      <td>Actualiza de forma parcial la información o parámetros del turno seleccionado.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-danger w-100">DELETE</span></td>
+                      <td><code>/turno/{id}</code></td>
+                      <td>Baja lógica: Finaliza el préstamo y libera inmediatamente el implemento deportivo.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
+                      <td><code>/turno/rehabilitar/{id}</code></td>
+                      <td>Revierte la finalización de un préstamo para regresarlo a estado activo bajo control de stock.</td>
+                  </tr>
+                  <tr class="table-secondary fw-bold"><td colspan="3"><i class="fa-solid fa-user-graduate me-2"></i>Módulo de Estudiantes</td></tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/estudiantes</code></td>
+                      <td>Listado general del censo de estudiantes registrados en Bienestar Universitario.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/estudiante/{id}</code></td>
+                      <td>Capturador por ID: Muestra el perfil del alumno y su historial transaccional de uso.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/estudiante/nuevo</code></td>
+                      <td>Renderiza el formulario de alta para nuevos usuarios académicos.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-primary w-100">POST</span></td>
+                      <td><code>/estudiante/nuevo</code></td>
+                      <td>Inserta un nuevo registro de estudiante validando su código único institucional.</td>
+                  </tr>
+                  <tr class="table-secondary fw-bold"><td colspan="3"><i class="fa-solid fa-futbol me-2"></i>Módulo de Inventario de Implementos</td></tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/implementos</code></td>
+                      <td>Grilla general del inventario físico disponible en los almacenes deportivos y culturales.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/implemento/{id}</code></td>
+                      <td>Capturador por ID: Muestra las especificaciones técnicas del recurso y su estado actual.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-success w-100">GET</span></td>
+                      <td><code>/implemento/nuevo</code></td>
+                      <td>Renderiza el formulario de inserción para nuevas adquisiciones de material.</td>
+                  </tr>
+                  <tr>
+                      <td><span class="badge bg-primary w-100">POST</span></td>
+                      <td><code>/implemento/nuevo</code></td>
+                      <td>Registra el nuevo implemento en el inventario cloud asignando su categoría base.</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
   </section>
 
   <section class="mb-4">
