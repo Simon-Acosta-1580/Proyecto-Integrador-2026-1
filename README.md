@@ -161,7 +161,7 @@ python -m venv .venv
 source .venv/scripts/activate
 
 # 3. Instalar dependencias
-pip install fastapi uvicorn sqlmodel psycopg2-binary jinja2
+pip install -r requirements.txt
 
 # 4. Iniciar el servidor
 uvicorn main:app --reload</code></pre>
