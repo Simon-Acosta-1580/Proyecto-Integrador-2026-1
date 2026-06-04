@@ -303,7 +303,7 @@ async def mostrar_formulario_turno(request: Request, session: SessionDep):
         }
     )
 @app.post("/turno/nuevo", response_class=HTMLResponse, tags=["Turnos"])
-async def create_turno_endpoint(
+async def create_turno_endpoint(request: Request,
         codigo: int = Form(...),
         estudiante_id: int = Form(...),
         implemento_id: int = Form(...),
@@ -318,10 +318,7 @@ async def create_turno_endpoint(
     new_turno = createTurno(turno_esquema, session)
 
     if not new_turno:
-        raise HTTPException(
-            status_code=409,
-            detail=f"No se pudo crear el turno. El código {codigo} ya existe o los recursos seleccionados ya no están disponibles."
-        )
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 409})
 
     return RedirectResponse(f"/turno/{new_turno.id}", status_code=303)
 
@@ -330,7 +327,7 @@ async def create_turno_endpoint(
 async def read_turnos(request: Request, session: SessionDep):
     lista_turnos = get_active_turnos(session)
     if not lista_turnos:
-        raise HTTPException(status_code=404, detail="No se encontraron turnos activos registrados")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     return templates.TemplateResponse(
         request,
@@ -343,7 +340,7 @@ async def read_turnos(request: Request, session: SessionDep):
 async def show_turnosInactivos(request: Request, session: SessionDep):
     turnos_inactivos = get_inactive_turnos(session)
     if not turnos_inactivos:
-        raise HTTPException(status_code=404, detail="No se encontraron turnos finalizados/inactivos")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     return templates.TemplateResponse(
         request,
@@ -357,7 +354,7 @@ async def show_one_turno_view(id: int, request: Request, session: SessionDep):
     turno = find_one_turno(id, session)
 
     if not turno:
-        raise HTTPException(status_code=404, detail=f"No se encontró el registro del turno con id: {id}")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     return templates.TemplateResponse(
         request,
@@ -370,7 +367,7 @@ async def show_one_turno_view(id: int, request: Request, session: SessionDep):
 async def mostrar_formulario_editar_turno(id: int, request: Request, session: SessionDep):
     turno_db = session.get(TurnoId, id)
     if not turno_db:
-        raise HTTPException(status_code=404, detail="Turno no encontrado")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     estudiantes = session.exec(select(EstudianteId)).all()
     implementos = session.exec(select(ImplementoId)).all()
@@ -388,7 +385,7 @@ async def mostrar_formulario_editar_turno(id: int, request: Request, session: Se
 
 @app.patch("/turno/editar/{id}", response_model=TurnoId, response_model_exclude={"id", "activo", "hora_inicio"},
            tags=["Turnos"])
-async def update_turno_endpoint(
+async def update_turno_endpoint(request: Request,
         id: int,
         estudiante_id: int = Form(...),
         implemento_id: int = Form(...),
@@ -396,7 +393,7 @@ async def update_turno_endpoint(
 ):
     turno_db = session.get(TurnoId, id)
     if not turno_db:
-        raise HTTPException(status_code=404, detail=f"Turno con ID {id} no encontrado")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     turno_update = TurnoUpdate(
         estudiante_id=estudiante_id,
@@ -406,34 +403,28 @@ async def update_turno_endpoint(
     updated_turno = update_one_turno(id, turno_update, session)
 
     if not updated_turno:
-        raise HTTPException(
-            status_code=400,
-            detail="Error al actualizar el turno. Verifique que los nuevos recursos seleccionados estén activos."
-        )
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 400})
+
 
     return JSONResponse(status_code=200, content={"message": "Turno actualizado correctamente"})
 
 
 @app.delete("/turno/{id}", response_model=TurnoId, tags=["Turnos"])
-async def finalizar_turno(id: int, session: SessionDep):
-    # En tu lógica, delete_turno cambia el estado a False y libera estudiante/implemento
+async def finalizar_turno(request:Request, id: int, session: SessionDep):
     turno_eliminado = delete_turno(id, session)
 
     if not turno_eliminado:
-        raise HTTPException(status_code=404, detail=f"Turno {id} no encontrado")
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 404})
 
     return turno_eliminado
 
 
 @app.patch("/turno/rehabilitar/{id}", response_model=TurnoId, tags=["Turnos"])
-def rehabilitar_turno_endpoint(id: int, session: SessionDep):
+def rehabilitar_turno_endpoint(request:Request,id: int, session: SessionDep):
     turno = reactivate_turno(id, session)
 
     if not turno:
-        raise HTTPException(
-            status_code=400,
-            detail="No se puede reactivar el turno. El estudiante o el implemento asignados ya se encuentran en otro turno activo."
-        )
+        return templates.TemplateResponse(request, "error_turno.html", {"status_code": 400})
 
     return turno
 
