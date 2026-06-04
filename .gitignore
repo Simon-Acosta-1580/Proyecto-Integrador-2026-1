@@ -3,7 +3,6 @@
 # ====================================================================
 
 # --- Entornos Virtuales (Aislamiento de Dependencias) ---
-# Evita subir gigabytes de librerías locales a GitHub
 .venv/
 venv/
 ENV/
@@ -11,7 +10,6 @@ env/
 育env/
 
 # --- Caché y Compilación de Python ---
-# Archivos internos que genera Python al ejecutar el backend
 __pycache__/
 *.pyc
 *.pyo
@@ -19,7 +17,6 @@ __pycache__/
 .pytest_cache/
 
 # --- Configuraciones del Entorno y Credenciales Secretas ---
-# ¡CRÍTICO! Aquí se ocultan las URLs de conexión a Neon/Supabase
 .env
 .env.local
 .env.*
@@ -27,7 +24,6 @@ instance/
 .secrets
 
 # --- Archivos de Configuración del Editor (IDE) ---
-# Evita compartir configuraciones locales de tu VS Code o PyCharm
 .vscode/
 .idea/
 *.suo
@@ -35,6 +31,11 @@ instance/
 *.njsproj
 *.sln
 *.swp
+
+# --- Archivos Temporales y de Bloqueo de Microsoft Office ---
+# Ignora los archivos que empiezan con ~$ (propios de Word, Excel, etc.)
+~$*
+.~lock.*
 
 # --- Sistema Operativo (Basura del Sistema) ---
 .DS_Store
