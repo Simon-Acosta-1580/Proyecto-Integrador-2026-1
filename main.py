@@ -52,12 +52,13 @@ async def mostrar_formulario_estudiante(request: Request):
     )
 
 @app.post("/estudiante/nuevo", response_class=HTMLResponse, tags=["Estudiantes"])
-async def create_estudiante(
+async def create_estudiante(request: Request,
         codigo: int = Form(...),
         nombre: str = Form(...),
         programa: str = Form(...),
         file: Optional[UploadFile] = File(None),
-        session: Session = Depends(get_session)
+        session: Session = Depends(get_session),
+
 ):
     url_supabase = None
     if file:
@@ -68,7 +69,7 @@ async def create_estudiante(
     new_estudiante = createEstudiante(estudiante_base, session, imagen_url=url_supabase)
 
     if not new_estudiante:
-        raise HTTPException(status_code=409, detail=f"El estudiante con código {codigo} ya existe.")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":409})
 
     return RedirectResponse(f"/estudiante/{new_estudiante.id}", status_code=303)
 
@@ -77,7 +78,7 @@ async def create_estudiante(
 async def read_estudiantes(request: Request, session: SessionDep):
     lista_estudiantes = get_active_students(session)
     if not lista_estudiantes:
-        raise HTTPException(status_code=409, detail=f"No se encontraron estudiantes registrados")
+        return templates.TemplateResponse(request, "error_estudiante.html", {"status_code":404})
     return templates.TemplateResponse(request, "estudiantes_activos.html", {"lista_estudiantes": lista_estudiantes}
     )
 
