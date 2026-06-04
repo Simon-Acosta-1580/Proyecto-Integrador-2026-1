@@ -41,53 +41,53 @@
       <p class="text-muted small">Listado de rutas semánticas construidas en el backend:</p>
         
   <div class="table-responsive">
-          <table class="table table-bordered table-striped align-middle">
-              <thead class="table-dark">
-                  <tr>
-                      <th style="width: 15%;">Método</th>
-                      <th style="width: 35%;">Ruta</th>
-                      <th style="width: 50%;">Acción de Negocio</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr>
-                      <td><span class="badge bg-success w-100">GET</span></td>
-                      <td><code>/</code></td>
-                      <td>Dashboard principal con el carrusel de accesos rápidos.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-success w-100">GET</span></td>
-                      <td><code>/turnos</code></td>
-                      <td>Panel de visualización de todos los turnos del sistema.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-success w-100">GET</span></td>
-                      <td><code>/turno/{id}</code></td>
-                      <td>Vista extendida y detalles de un turno específico.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-primary w-100">POST</span></td>
-                      <td><code>/turno/nuevo</code></td>
-                      <td>Procesa el formulario para registrar y abrir un nuevo préstamo.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
-                      <td><code>/turno/{id}</code></td>
-                      <td>Actualiza de forma parcial los datos de un turno existente.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-danger w-100">DELETE</span></td>
-                      <td><code>/turno/{id}</code></td>
-                      <td>Finaliza el turno de préstamo y libera el implemento de inmediato.</td>
-                  </tr>
-                  <tr>
-                      <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
-                      <td><code>/turno/rehabilitar/{id}</code></td>
-                      <td>Revierte la finalización de un préstamo para activarlo de nuevo.</td>
-                  </tr>
-              </tbody>
-            /table>
-      </div>
+      <table class="table table-bordered table-striped align-middle">
+          <thead class="table-dark">
+              <tr>
+                  <th style="width: 15%;">Método</th>
+                  <th style="width: 35%;">Ruta</th>
+                  <th style="width: 50%;">Acción de Negocio</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td><span class="badge bg-success w-100">GET</span></td>
+                  <td><code>/</code></td>
+                  <td>Dashboard principal con el carrusel de accesos rápidos.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-success w-100">GET</span></td>
+                  <td><code>/turnos</code></td>
+                  <td>Panel de visualización de todos los turnos del sistema.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-success w-100">GET</span></td>
+                  <td><code>/turno/{id}</code></td>
+                  <td>Vista extendida y detalles de un turno específico.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-primary w-100">POST</span></td>
+                  <td><code>/turno/nuevo</code></td>
+                  <td>Procesa el formulario para registrar y abrir un nuevo préstamo.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
+                  <td><code>/turno/{id}</code></td>
+                  <td>Actualiza de forma parcial los datos de un turno existente.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-danger w-100">DELETE</span></td>
+                  <td><code>/turno/{id}</code></td>
+                  <td>Finaliza el turno de préstamo y libera el implemento de inmediato.</td>
+              </tr>
+              <tr>
+                  <td><span class="badge bg-warning text-dark w-100">PATCH</span></td>
+                  <td><code>/turno/rehabilitar/{id}</code></td>
+                  <td>Revierte la finalización de un préstamo para activarlo de nuevo.</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
   </section>
 
   <section class="mb-4">
