@@ -1,4 +1,212 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>Bienvenido al registro de servicios de Bienestar Universitario</h1>
-{% endblock %}
+{% include 'header.html' %}
+
+<div class="animate__animated animate__fadeIn">
+
+    <div id="carouselBienestar" class="carousel slide carousel-fade shadow-sm mb-5 rounded-4 overflow-hidden" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselBienestar" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselBienestar" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselBienestar" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="4000">
+                <div class="carousel-overlay-bg" style="background: linear-gradient(135deg, var(--ucatolica-blue-dark), #00569d);"></div>
+                <div class="carousel-caption d-md-block text-start px-4">
+                    <span class="badge bg-warning text-dark mb-2 fw-bold text-uppercase">Módulo Académico</span>
+                    <h1 class="display-5 fw-bold text-white">Control de Estudiantes</h1>
+                    <p class="lead text-white-50">Administra el censo, estados y solicitudes de la comunidad universitaria de manera ágil.</p>
+                    <a href="/estudiantes" class="btn btn-ucatolica-gold btn-lg mt-2">
+                        <i class="fa-solid fa-users me-2"></i>Ver Listado
+                    </a>
+                </div>
+            </div>
+
+            <div class="carousel-item" data-bs-interval="4000">
+                <div class="carousel-overlay-bg" style="background: linear-gradient(135deg, #00569d, #0072ce);"></div>
+                <div class="carousel-caption d-md-block text-start px-4">
+                    <span class="badge bg-warning text-dark mb-2 fw-bold text-uppercase">Inventario Deportivo</span>
+                    <h1 class="display-5 fw-bold text-white">Inventario de Implementos</h1>
+                    <p class="lead text-white-50">Supervisa balones, indumentaria y recursos asignados a las canchas y zonas de esparcimiento.</p>
+                    <a href="/implementos" class="btn btn-ucatolica-gold btn-lg mt-2">
+                        <i class="fa-solid fa-futbol"></i> Explorar Recursos
+                    </a>
+                </div>
+            </div>
+
+            <div class="carousel-item" data-bs-interval="4000">
+                <div class="carousel-overlay-bg" style="background: linear-gradient(135deg, var(--ucatolica-blue-dark), #004b87);"></div>
+                <div class="carousel-caption d-md-block text-start px-4">
+                    <span class="badge bg-warning text-dark mb-2 fw-bold text-uppercase">Gestión de Préstamos</span>
+                    <h1 class="display-5 fw-bold text-white">Asignación de Turnos</h1>
+                    <p class="lead text-white-50">Monitorea en tiempo real los préstamos activos, tiempos de entrega y el histórico del sistema.</p>
+                    <a href="/turnos" class="btn btn-ucatolica-gold btn-lg mt-2">
+                        <i class="fa-solid fa-clock-history me-2"></i>Ver Panel de Turnos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselBienestar" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselBienestar" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark">Acciones de Registro Rápido</h2>
+            <p class="text-muted">Añade nuevos elementos a la base de datos de Bienestar Universitario de forma directa.</p>
+            <div class="header-line mx-auto"></div>
+        </div>
+
+        <div class="row text-center g-4 d-flex justify-content-center">
+
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <div class="circle-icon-wrapper bg-blue-light text-primary-custom mb-3">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Nuevo Estudiante</h4>
+                <p class="text-muted px-3 small text-center" style="max-width: 280px;">Registra un nuevo alumno apto para el uso de los escenarios y materiales institucionales.</p>
+                <a href="/estudiante/nuevo" class="btn btn-action-outline btn-sm px-4 mt-2">
+                    <i class="fa-solid fa-plus me-1"></i> Registrar
+                </a>
+            </div>
+
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <div class="circle-icon-wrapper bg-gold-light text-gold-custom mb-3">
+                    <i class="fa-solid fa-circle-plus"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Nuevo Implemento</h4>
+                <p class="text-muted px-3 small text-center" style="max-width: 280px;">Añade material deportivo o cultural indicando su código, nombre y categoría base.</p>
+                <a href="/implemento/nuevo" class="btn btn-action-outline btn-sm px-4 mt-2">
+                    <i class="fa-solid fa-plus me-1"></i> Añadir
+                </a>
+            </div>
+
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <div class="circle-icon-wrapper bg-success-light text-success-custom mb-3">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Nuevo Turno</h4>
+                <p class="text-muted px-3 small text-center" style="max-width: 280px;">Vincula un estudiante con un recurso libre para dar apertura a un préstamo inmediato.</p>
+                <a href="/turno/nuevo" class="btn btn-action-outline btn-sm px-4 mt-2">
+                    <i class="fa-solid fa-plus me-1"></i> Asignar
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --ucatolica-blue: #004b87;
+        --ucatolica-blue-dark: #003865;
+        --ucatolica-gold: #f9b233;
+        --text-dark: #1e293b;
+    }
+
+    /* Estilos del Carrusel */
+    .carousel {
+        height: 420px;
+    }
+
+    .carousel-item {
+        height: 420px;
+        position: relative;
+    }
+
+    .carousel-overlay-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover !important;
+        background-position: center !important;
+    }
+
+    .carousel-caption {
+        top: 50%;
+        transform: translateY(-50%);
+        bottom: initial !important;
+        max-width: 600px;
+        z-index: 5;
+    }
+
+    .btn-ucatolica-gold {
+        background-color: var(--ucatolica-gold);
+        color: var(--ucatolica-blue-dark) !important;
+        font-weight: 700;
+        border: none;
+        padding: 10px 24px;
+        font-size: 15px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-ucatolica-gold:hover {
+        background-color: #e09b22;
+        transform: translateY(-1px);
+    }
+
+    /* Estilos de la sección de círculos */
+    .header-line {
+        width: 60px;
+        height: 4px;
+        background-color: var(--ucatolica-blue);
+        border-radius: 2px;
+        margin-top: 12px;
+    }
+
+    .circle-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+    }
+
+    /* Variaciones de color para cada círculo */
+    .bg-blue-light { background-color: #e0f2fe; }
+    .text-primary-custom { color: #0369a1; }
+
+    .bg-gold-light { background-color: #fef3c7; }
+    .text-gold-custom { color: #b45309; }
+
+    .bg-success-light { background-color: #dcfce7; }
+    .text-success-custom { color: #15803d; }
+
+    /* Efecto hover en los círculos */
+    .col-md-4:hover .circle-icon-wrapper {
+        transform: scale(1.08) translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 75, 135, 0.08);
+    }
+
+    /* Botón de acción rápido (Outline) */
+    .btn-action-outline {
+        border: 2px solid #e2e8f0;
+        color: #475569;
+        font-weight: 700;
+        border-radius: 20px;
+        transition: all 0.2s ease;
+        background-color: #ffffff;
+    }
+
+    .btn-action-outline:hover {
+        border-color: var(--ucatolica-blue);
+        background-color: var(--ucatolica-blue);
+        color: #ffffff;
+    }
+</style>
+
+{% include 'footer.html' %}
